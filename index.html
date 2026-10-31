@@ -1,0 +1,2480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maharashtra CRMI 2026–2027 | Live Net Vacancy & Satellite Portal</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        :root {
+            --bg-dark: #070a12;
+            --surface-glass: rgba(15, 23, 42, 0.88);
+            --surface-card: rgba(20, 29, 47, 0.96);
+            --border-glass: rgba(255, 255, 255, 0.12);
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --accent: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --shadow-float: 0 20px 40px -15px rgba(0, 0, 0, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100vw;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            background: #020617;
+        }
+
+        /* Floating Top Bar */
+        .top-nav {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            right: 16px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .top-left, .top-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .brand-badge {
+            background: var(--surface-glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            padding: 10px 18px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--shadow-float);
+        }
+
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #0284c7, #10b981);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+        }
+
+        .brand-title h1 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .brand-title p {
+            font-size: 11px;
+            color: var(--primary);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Search Autocomplete */
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-container {
+            background: var(--surface-glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            padding: 8px 14px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-float);
+            min-width: 350px;
+            transition: all 0.2s ease;
+        }
+
+        .search-container:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), var(--shadow-float);
+        }
+
+        .search-container input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 13px;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .search-container input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .clear-search-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 2px 4px;
+            font-size: 13px;
+            display: none;
+            transition: color 0.15s;
+        }
+
+        .clear-search-btn:hover {
+            color: #fff;
+        }
+
+        .match-count-badge {
+            font-size: 11px;
+            color: var(--primary);
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(56, 189, 248, 0.12);
+            padding: 2px 7px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+
+        /* Autocomplete Suggestions Dropdown */
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: var(--surface-card);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-md);
+            max-height: 420px;
+            overflow-y: auto;
+            z-index: 2500;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.9);
+            display: none;
+        }
+
+        .search-dropdown.active {
+            display: block;
+        }
+
+        .search-district-card {
+            background: linear-gradient(135deg, rgba(2, 132, 199, 0.25), rgba(16, 185, 129, 0.15));
+            border-bottom: 2px solid rgba(56, 189, 248, 0.3);
+            padding: 12px 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: background 0.15s;
+        }
+
+        .search-district-card:hover {
+            background: linear-gradient(135deg, rgba(2, 132, 199, 0.4), rgba(16, 185, 129, 0.25));
+        }
+
+        .district-card-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .district-icon-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--primary);
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+        }
+
+        .district-card-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .district-card-sub {
+            font-size: 11px;
+            color: #bae6fd;
+        }
+
+        .district-action-pill {
+            background: var(--primary);
+            color: #0f172a;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .search-section-header {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            padding: 8px 14px 4px;
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        .search-result-item {
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-result-item:hover, .search-result-item.highlighted {
+            background: rgba(56, 189, 248, 0.15);
+        }
+
+        .search-result-item .item-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        .search-result-item .item-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--surface-glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            color: var(--text-main);
+            padding: 9px 15px;
+            border-radius: var(--radius-lg);
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-float);
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: rgba(30, 41, 59, 0.95);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0284c7, #0ea5e9);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            position: absolute;
+            top: 78px;
+            left: 16px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            max-width: calc(100vw - 32px);
+            padding-bottom: 4px;
+        }
+
+        .filter-pill {
+            background: var(--surface-glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .filter-pill:hover, .filter-pill.active {
+            background: var(--primary);
+            color: #042f2e;
+            font-weight: 700;
+            border-color: var(--primary);
+            box-shadow: 0 2px 10px rgba(56, 189, 248, 0.4);
+        }
+
+        .district-select-pill {
+            background: var(--surface-glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--primary);
+            color: #38bdf8;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            outline: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .district-select-pill option {
+            background: #0f172a;
+            color: #fff;
+        }
+
+        /* Floating Tool Panel */
+        .tool-panel {
+            position: absolute;
+            bottom: 24px;
+            right: 16px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .tool-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--surface-glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow-float);
+        }
+
+        .tool-btn:hover, .tool-btn.active {
+            background: var(--primary);
+            color: #0f172a;
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        /* Clean Marker Pins (NO MISLEADING GROSS CAPACITY ON START PAGE) */
+        .college-pin-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .pin-badge-clean {
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .pin-badge-clean:hover {
+            transform: scale(1.15) translateY(-3px);
+            z-index: 9999 !important;
+        }
+
+        .badge-theme-blue {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #f8fafc;
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+
+        .pin-subtag {
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-weight: 800;
+        }
+
+        .tag-vacant { background: #10b981; color: #022c22; }
+        .tag-low { background: #f59e0b; color: #451a03; }
+        .tag-full { background: #ef4444; color: #fff; }
+
+        .pin-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #38bdf8;
+            border: 2px solid #0f172a;
+            margin-top: 2px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.8);
+        }
+
+        /* Leaflet Popup Cards */
+        .leaflet-popup-content-wrapper {
+            background: var(--surface-card) !important;
+            backdrop-filter: blur(20px) !important;
+            border: 1px solid var(--border-glass) !important;
+            border-radius: var(--radius-lg) !important;
+            color: var(--text-main) !important;
+            box-shadow: var(--shadow-float) !important;
+            padding: 0 !important;
+            overflow: hidden;
+        }
+
+        .leaflet-popup-content {
+            margin: 0 !important;
+            line-height: 1.4 !important;
+            min-width: 350px;
+            max-width: 410px;
+        }
+
+        .leaflet-popup-tip {
+            background: var(--surface-card) !important;
+            border: 1px solid var(--border-glass) !important;
+        }
+
+        .popup-header {
+            padding: 16px 18px 12px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .popup-header .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .popup-header .sno-tag {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        .popup-header .type-pill {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+        }
+
+        .popup-header h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        .popup-header .loc-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .popup-body {
+            padding: 14px 18px;
+        }
+
+        /* TRUE NET VACANCY ENGINE CARD */
+        .net-vacancy-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .vacancy-top-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.2fr;
+            gap: 8px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .vacancy-cell {
+            background: rgba(30, 41, 59, 0.5);
+            padding: 6px 8px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .vacancy-cell .lbl {
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .vacancy-cell .num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        .vacancy-cell.highlight-net {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.35);
+        }
+
+        .vacancy-cell.highlight-net .num {
+            color: #34d399;
+            font-size: 20px;
+        }
+
+        .vacancy-cell.highlight-full {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.35);
+        }
+
+        .vacancy-cell.highlight-full .num {
+            color: #ef4444;
+            font-size: 16px;
+        }
+
+        /* Occupancy Progress Bar (Idea 5) */
+        .progress-bar-wrap {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 6px;
+            display: flex;
+        }
+
+        .progress-fill {
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Live Ground Info Section */
+        .ground-info-section {
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .ground-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #34d399;
+            text-transform: uppercase;
+        }
+
+        .ground-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .ground-cell {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .ground-cell .label {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .ground-cell .val {
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .ground-cell.full-width {
+            grid-column: span 2;
+        }
+
+        .popup-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.2fr;
+            gap: 6px;
+        }
+
+        .btn-sm {
+            padding: 7px 10px;
+            font-size: 11px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        /* Sliding Data Table Drawer */
+        .drawer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 82vh;
+            background: var(--surface-card);
+            backdrop-filter: blur(24px);
+            border-top: 1px solid var(--border-glass);
+            z-index: 2000;
+            box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            transform: translateY(105%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .drawer.open {
+            transform: translateY(0);
+        }
+
+        .drawer-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .drawer-header h2 {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .drawer-body {
+            padding: 16px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Table */
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .custom-table th {
+            background: rgba(15, 23, 42, 0.95);
+            color: var(--text-muted);
+            text-align: left;
+            padding: 10px 12px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-glass);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .custom-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #cbd5e1;
+        }
+
+        .custom-table tr:hover td {
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+        }
+
+        /* PREFERENCE LIST DRAWER (Idea 4) */
+        .pref-drawer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 440px;
+            height: 100vh;
+            background: var(--surface-card);
+            backdrop-filter: blur(24px);
+            border-left: 1px solid var(--border-glass);
+            z-index: 2200;
+            box-shadow: -20px 0 50px rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            transform: translateX(105%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .pref-drawer.open {
+            transform: translateX(0);
+        }
+
+        .pref-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pref-body {
+            padding: 16px 20px;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pref-item-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .pref-item-card:hover {
+            border-color: var(--primary);
+        }
+
+        .pref-rank-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            outline: none;
+            flex: 1;
+        }
+        .pref-rank-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            box-shadow: 0 0 6px rgba(56, 189, 248, 0.6);
+        }
+        .pref-rank-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+        }
+
+        .pref-rank-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #0284c7, #0ea5e9);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .pref-reorder-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .reorder-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #cbd5e1;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+        }
+
+        .reorder-btn:hover {
+            background: var(--primary);
+            color: #0f172a;
+        }
+
+        /* Interactive Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.78);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 580px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-body {
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .form-control {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--border-glass);
+            padding: 9px 12px;
+            border-radius: var(--radius-md);
+            color: #fff;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Directions Panel */
+        .directions-box {
+            position: absolute;
+            top: 140px;
+            left: 16px;
+            width: 360px;
+            background: var(--surface-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            z-index: 1000;
+            box-shadow: var(--shadow-float);
+            display: none;
+        }
+
+        .directions-box.active {
+            display: block;
+        }
+
+        /* Measure Banner */
+        .measure-banner {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--primary);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #38bdf8;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .measure-banner.active {
+            display: flex;
+        }
+
+        /* Basemap Layer Picker */
+        .layer-picker-menu {
+            position: absolute;
+            bottom: 80px;
+            right: 68px;
+            background: var(--surface-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-md);
+            padding: 10px;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: var(--shadow-float);
+            min-width: 200px;
+        }
+
+        .layer-picker-menu.active {
+            display: flex;
+        }
+
+        .layer-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #cbd5e1;
+            transition: all 0.2s;
+        }
+
+        .layer-option:hover, .layer-option.selected {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+        }
+
+        @media (max-width: 768px) {
+            .search-container { min-width: 140px; }
+            .brand-title p { display: none; }
+            .pref-drawer { width: 100vw; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MAP CONTAINER -->
+    <div id="map"></div>
+
+    <!-- TOP FLOATING BAR -->
+    <div class="top-nav">
+        <div class="top-left">
+            <div class="brand-badge">
+                <div class="brand-logo"><i class="fa-solid fa-earth-asia"></i></div>
+                <div class="brand-title">
+                    <h1>Maharashtra CRMI 2026–27</h1>
+                    <p>84 COLLEGES • LIVE NET VACANCY & PREFERENCE BUILDER</p>
+                </div>
+            </div>
+
+            <!-- SEARCH AUTOCOMPLETE -->
+            <div class="search-wrapper">
+                <div class="search-container">
+                    <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 13px;"></i>
+                    <input type="text" id="searchInput" placeholder="Search District (Dhule, Nashik...) or College..." autocomplete="off" oninput="handleSearchInput(this.value)" onkeydown="handleSearchKey(event)" />
+                    <button id="clearSearchBtn" class="clear-search-btn" onclick="clearSearch()" title="Clear search">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <span id="matchCount" class="match-count-badge">84 Colleges</span>
+                </div>
+                <div id="searchDropdown" class="search-dropdown"></div>
+            </div>
+        </div>
+
+        <div class="top-right">
+            <!-- PREFERENCE LIST BUTTON -->
+            <button class="btn btn-warning" onclick="togglePrefDrawer()">
+                <i class="fa-solid fa-star"></i> My Choices (<span id="prefBadgeCount">0</span>)
+            </button>
+            <button class="btn btn-primary" onclick="toggleDrawer()">
+                <i class="fa-solid fa-table-list"></i> Full Table
+            </button>
+            <button class="btn btn-accent" onclick="openReviewModal()">
+                <i class="fa-solid fa-plus-circle"></i> Add Ground Info
+            </button>
+            <a href="https://forms.gle/BDd7dDk3Lwz5ju5FA" target="_blank" class="btn">
+                <i class="fa-solid fa-clipboard-check" style="color: #60a5fa;"></i> Google Form
+            </a>
+        </div>
+    </div>
+
+    <!-- FILTER PILLS ROW -->
+    <div class="filter-bar">
+        <div class="filter-pill active" id="pillAll" onclick="setDivisionFilter('All', this)">All Maharashtra (84)</div>
+        
+        <select class="district-select-pill" id="districtSelect" onchange="onDistrictDropdownSelect(this.value)">
+            <option value="">📍 Jump to District...</option>
+        </select>
+
+        <div class="filter-pill" onclick="setDivisionFilter('Konkan', this)">Mumbai & Konkan (17)</div>
+        <div class="filter-pill" onclick="setDivisionFilter('Pune', this)">Pune Division (18)</div>
+        <div class="filter-pill" onclick="setDivisionFilter('Nashik', this)">Nashik Division (11)</div>
+        <div class="filter-pill" onclick="setDivisionFilter('Marathwada', this)">Marathwada (14)</div>
+        <div class="filter-pill" onclick="setDivisionFilter('Vidarbha', this)">Vidarbha (24)</div>
+        <div class="filter-pill" onclick="setTypeFilter('Government', this)">Govt & Corp Only</div>
+        <div class="filter-pill" onclick="setHighSeatsFilter(this)">High Quota (≥50)</div>
+    </div>
+
+    <!-- RIGHT SIDE TOOL PANEL -->
+    <div class="tool-panel">
+        <button class="tool-btn" id="layerBtn" title="Change Base Map (Google Satellite / Streets / Esri)" onclick="toggleLayerMenu()">
+            <i class="fa-solid fa-layer-group"></i>
+        </button>
+        <button class="tool-btn" id="rulerBtn" title="Distance Measure Tool" onclick="toggleRuler()">
+            <i class="fa-solid fa-ruler-combined"></i>
+        </button>
+        <button class="tool-btn" id="directionsToggleBtn" title="Directions & Routing" onclick="toggleDirectionsBox()">
+            <i class="fa-solid fa-route"></i>
+        </button>
+        <button class="tool-btn" title="Recenter Maharashtra" onclick="resetMapBounds()">
+            <i class="fa-solid fa-location-crosshairs"></i>
+        </button>
+        <button class="tool-btn" title="Export Community Reviews (JSON)" onclick="exportCrowdsourcedData()">
+            <i class="fa-solid fa-download"></i>
+        </button>
+        <button class="tool-btn" title="Import Community Reviews (JSON)" onclick="triggerImport()">
+            <i class="fa-solid fa-upload"></i>
+        </button>
+        <input type="file" id="importFileInput" style="display: none;" accept=".json" onchange="importCrowdsourcedData(event)" />
+    </div>
+
+    <!-- BASEMAP SELECTION MENU -->
+    <div class="layer-picker-menu" id="layerMenu">
+        <div class="layer-option selected" id="opt_google_hybrid" onclick="selectTileLayer('google_hybrid')">
+            <i class="fa-solid fa-satellite"></i> Google Hybrid Satellite
+        </div>
+        <div class="layer-option" id="opt_google_streets" onclick="selectTileLayer('google_streets')">
+            <i class="fa-solid fa-map"></i> Google Streets
+        </div>
+        <div class="layer-option" id="opt_esri_satellite" onclick="selectTileLayer('esri_satellite')">
+            <i class="fa-solid fa-globe"></i> Esri World Satellite
+        </div>
+    </div>
+
+    <!-- MEASURE TOOL BANNER -->
+    <div class="measure-banner" id="measureBanner">
+        <i class="fa-solid fa-ruler" style="font-size: 16px;"></i>
+        <span>Measured Distance: <strong id="measureDistText" style="color: #fff; font-size: 15px;">0.00 km</strong></span>
+        <button class="btn btn-sm" style="padding: 4px 10px; font-size: 11px;" onclick="clearRuler()">Reset</button>
+        <button class="btn btn-sm btn-primary" style="padding: 4px 10px; font-size: 11px;" onclick="toggleRuler()">Done</button>
+    </div>
+
+    <!-- DIRECTIONS PANEL -->
+    <div class="directions-box" id="directionsBox">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h4 style="font-size: 14px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-diamond-turn-right" style="color: var(--primary);"></i> Driving Directions
+            </h4>
+            <i class="fa-solid fa-xmark" style="cursor: pointer; color: var(--text-muted);" onclick="toggleDirectionsBox()"></i>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="form-group">
+                <label>Origin / Starting Point</label>
+                <div style="display: flex; gap: 6px;">
+                    <input type="text" id="routeStart" class="form-control" style="font-size: 12px;" placeholder="Your GPS or College Name" />
+                    <button class="btn btn-sm" title="Use Current GPS" onclick="useCurrentLocationAsStart()"><i class="fa-solid fa-crosshairs"></i></button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Destination Medical College</label>
+                <select id="routeEnd" class="form-control" style="font-size: 12px;" onchange="calculateRouteFromSelect()">
+                    <option value="">Select a college...</option>
+                </select>
+            </div>
+
+            <div id="routeResults" style="display: none; background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 12px; margin-top: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 11px; color: var(--text-muted);">Driving Distance:</span>
+                    <strong id="routeKm" style="color: #38bdf8; font-size: 16px; font-family: 'JetBrains Mono';">0 km</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                    <span style="font-size: 11px; color: var(--text-muted);">Est. Driving Time:</span>
+                    <strong id="routeDuration" style="color: #34d399; font-size: 14px;">0 hrs</strong>
+                </div>
+            </div>
+            
+            <button class="btn btn-sm btn-primary" style="margin-top: 8px; width: 100%;" onclick="executeDrivingRoute()">
+                <i class="fa-solid fa-car"></i> Get Route On Google Satellite
+            </button>
+        </div>
+    </div>
+
+    <!-- PREFERENCE LIST DRAWER (Idea 4) -->
+    <div class="pref-drawer" id="prefDrawer">
+        <div class="pref-header">
+            <div>
+                <h3 style="font-size: 16px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-star" style="color: #f59e0b;"></i> My Counseling Choices
+                </h3>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;" id="prefSummarySubtitle">
+                    0 Colleges Shortlisted
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-sm btn-primary" onclick="exportPreferencesList()" title="Export Choice Order">
+                    <i class="fa-solid fa-file-export"></i> Export Choices
+                </button>
+                <button class="btn btn-sm" onclick="togglePrefDrawer()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+        <div class="pref-body" id="prefBody">
+            <!-- Populated via JS -->
+        </div>
+    </div>
+
+    <!-- SLIDING FULL DATA TABLE DRAWER -->
+    <div class="drawer" id="mainDrawer">
+        <div class="drawer-header">
+            <div>
+                <h2>
+                    <i class="fa-solid fa-building-columns" style="color: var(--primary);"></i>
+                    Maharashtra CRMI Medical Colleges (AY 2026–2027)
+                </h2>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;" id="drawerSubtitle">
+                    84 Approved Colleges • Gross Capacity vs. Live Net Vacancies
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="btn btn-sm" onclick="exportTableToCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+                <button class="btn btn-sm" onclick="toggleDrawer()"><i class="fa-solid fa-xmark"></i> Close</button>
+            </div>
+        </div>
+
+        <div class="drawer-body">
+            <table class="custom-table" id="collegesTable">
+                <thead>
+                    <tr>
+                        <th style="width: 45px;">S.No</th>
+                        <th>College Name</th>
+                        <th style="text-align: center; color: #94a3b8;">NMC Quota (Gross)</th>
+                        <th style="text-align: center; color: #f59e0b;">Current FMGs</th>
+                        <th style="text-align: center; color: #10b981; font-weight: 800;">True Net Vacancy</th>
+                        <th>District</th>
+                        <th style="color: #34d399;">Stipend</th>
+                        <th>Biometrics</th>
+                        <th style="color: #f87171;">Hidden Fees</th>
+                        <th style="color: #38bdf8;">Living / PG Cost</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- INTERACTIVE CROWDSOURCING SUBMISSION MODAL -->
+    <div class="modal-overlay" id="reviewModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-pen" style="color: #34d399;"></i> Add / Update Ground Reality Info</h3>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; color: var(--text-muted);" onclick="closeReviewModal()"></i>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Medical College *</label>
+                    <select id="modalCollegeSelect" class="form-control" onchange="syncModalCollegeDetails()">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label style="color: #f59e0b;">Currently Serving FMGE Interns *</label>
+                        <input type="number" id="modalCurrentInterns" class="form-control" placeholder="e.g. 15 (Count currently posted)" min="0" oninput="calcModalNetVacancy()" />
+                    </div>
+                    <div class="form-group">
+                        <label style="color: #34d399;">Calculated Net Vacancy</label>
+                        <input type="text" id="modalNetVacancyDisplay" class="form-control" style="font-weight: 800; color: #10b981;" readonly placeholder="Auto-calculated" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Monthly Stipend for FMGs (₹/month) *</label>
+                        <input type="text" id="modalStipend" class="form-control" placeholder="e.g. ₹18,000 or ₹0 (Unpaid) or ₹11,000" />
+                    </div>
+                    <div class="form-group">
+                        <label>Biometric Attendance System *</label>
+                        <select id="modalBiometrics" class="form-control">
+                            <option value="Not Specified">Select biometric strictness...</option>
+                            <option value="Strict (2x Daily Morning & Evening)">Strict (2x Daily Punching)</option>
+                            <option value="Moderate (1x Daily / Departmental)">Moderate (1x Daily)</option>
+                            <option value="Relaxed / Manual Register Sign-in">Relaxed / Manual Register Sign-in</option>
+                            <option value="None / Not Implemented">None / No Biometric Machine</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- IDEA 3: HIDDEN CHARGES & LIVING COST -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label style="color: #f87171;">Hidden Fees / Demanded Deposits</label>
+                        <input type="text" id="modalHiddenFees" class="form-control" placeholder="e.g. None / ₹0 or ₹50k Library deposit" />
+                    </div>
+                    <div class="form-group">
+                        <label style="color: #38bdf8;">Average Monthly Rent / PG Cost Nearby</label>
+                        <input type="text" id="modalLivingCost" class="form-control" placeholder="e.g. ₹8,000/mo or ₹22,000/mo (South Mumbai)" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Workload & Duty Hours</label>
+                        <select id="modalWorkload" class="form-control">
+                            <option value="Not Specified">Select workload...</option>
+                            <option value="Very Chill (6-7 hrs/day, light duties)">Very Chill (6-7 hrs/day)</option>
+                            <option value="Moderate (8-9 hrs, regular emergencies)">Moderate (8-9 hrs)</option>
+                            <option value="Heavy (36h night calls, heavy patient load)">Heavy (36h night calls)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Hostel Availability for FMGs</label>
+                        <select id="modalHostel" class="form-control">
+                            <option value="Not Specified">Select hostel status...</option>
+                            <option value="Provided on campus">Provided on campus</option>
+                            <option value="Outside PG / Rented Flats readily available">Outside PG / Rented Flats</option>
+                            <option value="Strictly No Hostel">Strictly No Hostel</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ground Reality / Anonymous Tips & Warnings</label>
+                    <textarea id="modalNotes" class="form-control" rows="2" placeholder="Clinical hands-on, department toxicity, fee harassment, or study leave..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Your Name / Telegram Handle (Optional)</label>
+                    <input type="text" id="modalAuthor" class="form-control" placeholder="Anonymous Senior or Your Name" />
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-sm" onclick="closeReviewModal()">Cancel</button>
+                <button class="btn btn-sm btn-accent" onclick="saveGroundReview()">
+                    <i class="fa-solid fa-floppy-disk"></i> Save & Recalculate Net Vacancy
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        // Official 84 Colleges Clean Dataset from NMC AY 2026-2027 (Precise Campus Coordinates)
+        const collegesData = [{"s_no": 336, "name": "ACPM Medical College, Dhule", "seats": 100, "lat": 20.8988, "lng": 74.7275, "district": "Dhule", "division": "Nashik", "type": "Private", "city": "Dhule", "aliases": "ACPM Dhule, Jawahar Medical Foundation", "search_corpus": "336 acpm medical college, dhule dhule dhule nashik private acpm dhule, jawahar medical foundation 100"}, {"s_no": 337, "name": "Armed Forces Medical College, Pune", "seats": 11, "lat": 18.5028, "lng": 73.8906, "district": "Pune", "division": "Pune", "type": "Government (Armed Forces)", "city": "Pune", "aliases": "AFMC, Armed Forces, Wanowrie, Wanawadi, Army Medical College", "search_corpus": "337 armed forces medical college, pune pune pune pune government (armed forces) afmc, armed forces, wanowrie, wanawadi, army medical college 11"}, {"s_no": 338, "name": "Ashwini Rural Medical College, Hospital & Research Centre, Solapur", "seats": 58, "lat": 17.6328, "lng": 75.9814, "district": "Solapur", "division": "Pune", "type": "Private", "city": "Solapur", "aliases": "Ashwini Solapur, Kumbhari, ARMCH", "search_corpus": "338 ashwini rural medical college, hospital & research centre, solapur solapur solapur pune private ashwini solapur, kumbhari, armch 58"}, {"s_no": 339, "name": "B. J. Govt. Medical College, Pune", "seats": 19, "lat": 18.5262, "lng": 73.8732, "district": "Pune", "division": "Pune", "type": "Government", "city": "Pune", "aliases": "BJMC, BJ Medical, Sassoon Hospital, Sassoon General Hospital, Pune Station, BJGMC, GMC, GMCH", "search_corpus": "339 b. j. govt. medical college, pune pune pune pune government bjmc, bj medical, sassoon hospital, sassoon general hospital, pune station, bjgmc, gmc, gmch 19"}, {"s_no": 340, "name": "B.K.L. Walawalkar Rural Medical College, Ratnagiri", "seats": 11, "lat": 17.5389, "lng": 73.5186, "district": "Ratnagiri", "division": "Konkan", "type": "Private", "city": "Dervan (Chiplun)", "aliases": "BKL Walawalkar, Dervan, Chiplun, Ratnagiri, Walawalkar Hospital", "search_corpus": "340 b.k.l. walawalkar rural medical college, ratnagiri dervan (chiplun) ratnagiri konkan private bkl walawalkar, dervan, chiplun, ratnagiri, walawalkar hospital 11"}, {"s_no": 341, "name": "Bharati Vidyapeeth Deemed University Medical College & Hospital, Sangli", "seats": 111, "lat": 16.8524, "lng": 74.6115, "district": "Sangli", "division": "Pune", "type": "Deemed", "city": "Sangli", "aliases": "Bharati Vidyapeeth Sangli, BVDU Sangli, Wanlesswadi", "search_corpus": "341 bharati vidyapeeth deemed university medical college & hospital, sangli sangli sangli pune deemed bharati vidyapeeth sangli, bvdu sangli, wanlesswadi 111"}, {"s_no": 342, "name": "Bharati Vidyapeeth University Medical College, Pune", "seats": 111, "lat": 18.4575, "lng": 73.8508, "district": "Pune", "division": "Pune", "type": "Deemed", "city": "Pune", "aliases": "Bharati Vidyapeeth Pune, BVDU Pune, Katraj, Dhankawadi", "search_corpus": "342 bharati vidyapeeth university medical college, pune pune pune pune deemed bharati vidyapeeth pune, bvdu pune, katraj, dhankawadi 111"}, {"s_no": 343, "name": "Bharatratna Atal Bihari Vajpayee Medical College, Pune", "seats": 8, "lat": 18.5284, "lng": 73.8695, "district": "Pune", "division": "Pune", "type": "Government (PMC)", "city": "Pune", "aliases": "ABVMC, Atal Bihari Vajpayee, Naidu Hospital, PMC Medical College, Mangalwar Peth", "search_corpus": "343 bharatratna atal bihari vajpayee medical college, pune pune pune pune government (pmc) abvmc, atal bihari vajpayee, naidu hospital, pmc medical college, mangalwar peth 8"}, {"s_no": 344, "name": "D. Y. Patil University, School of Medicine", "seats": 100, "lat": 19.0416, "lng": 73.0232, "district": "Thane", "division": "Konkan", "type": "Deemed", "city": "Navi Mumbai (Nerul)", "aliases": "DY Patil Nerul, DY Patil Navi Mumbai, School of Medicine Nerul", "search_corpus": "344 d. y. patil university, school of medicine navi mumbai (nerul) thane konkan deemed dy patil nerul, dy patil navi mumbai, school of medicine nerul 100"}, {"s_no": 345, "name": "Datta Meghe Medical College, Nagpur", "seats": 111, "lat": 21.0967, "lng": 79.0264, "district": "Nagpur", "division": "Nagpur", "type": "Deemed", "city": "Nagpur (Hingna)", "aliases": "DMMC, Datta Meghe Nagpur, Wanadongri, Hingna", "search_corpus": "345 datta meghe medical college, nagpur nagpur (hingna) nagpur nagpur deemed dmmc, datta meghe nagpur, wanadongri, hingna 111"}, {"s_no": 346, "name": "Dr D Y Patil Medical College Hospital and Research Centre Pimpri pune", "seats": 19, "lat": 18.6253, "lng": 73.8166, "district": "Pune", "division": "Pune", "type": "Deemed", "city": "Pimpri, Pune", "aliases": "DY Patil Pimpri, DPU Pune, Dr D Y Patil Pimpri, Sant Tukaram Nagar, PCMC", "search_corpus": "346 dr d y patil medical college hospital and research centre pimpri pune pimpri, pune pune pune deemed dy patil pimpri, dpu pune, dr d y patil pimpri, sant tukaram nagar, pcmc 19"}, {"s_no": 347, "name": "Dr Vaishampayan Memorial Medical College, Solapur", "seats": 15, "lat": 17.6714, "lng": 75.9038, "district": "Solapur", "division": "Pune", "type": "Government", "city": "Solapur", "aliases": "VMGMC, Vaishampayan Solapur, Civil Hospital Solapur, GMC Solapur", "search_corpus": "347 dr vaishampayan memorial medical college, solapur solapur solapur pune government vmgmc, vaishampayan solapur, civil hospital solapur, gmc solapur 15"}, {"s_no": 348, "name": "Dr. D Y Patil Medical College, Kolhapur", "seats": 11, "lat": 16.7214, "lng": 74.2467, "district": "Kolhapur", "division": "Pune", "type": "Deemed", "city": "Kolhapur", "aliases": "DY Patil Kolhapur, Kadamwadi, Kasaba Bawada", "search_corpus": "348 dr. d y patil medical college, kolhapur kolhapur kolhapur pune deemed dy patil kolhapur, kadamwadi, kasaba bawada 11"}, {"s_no": 349, "name": "Dr. N Y Tasgaonkar Institute of Medical Science", "seats": 8, "lat": 18.9567, "lng": 73.3421, "district": "Raigad", "division": "Konkan", "type": "Private", "city": "Karjat", "aliases": "Tasgaonkar, NY Tasgaonkar Karjat, Diksal, Raigad", "search_corpus": "349 dr. n y tasgaonkar institute of medical science karjat raigad konkan private tasgaonkar, ny tasgaonkar karjat, diksal, raigad 8"}, {"s_no": 350, "name": "Dr. Panjabrao Alias Bhausaheb Deshmukh Memorial Medical College, Amravati", "seats": 11, "lat": 20.932, "lng": 77.7523, "district": "Amravati", "division": "Amravati", "type": "Private", "city": "Amravati", "aliases": "PDMMC, Panjabrao Deshmukh Amravati, Shivaji Nagar Amravati", "search_corpus": "350 dr. panjabrao alias bhausaheb deshmukh memorial medical college, amravati amravati amravati amravati private pdmmc, panjabrao deshmukh amravati, shivaji nagar amravati 11"}, {"s_no": 351, "name": "Dr. Rajendra Gode Medical College, Amravati, Maharashtra", "seats": 150, "lat": 20.9167, "lng": 77.75, "district": "Amravati", "division": "Amravati", "type": "Private", "city": "Amravati", "aliases": "Dr Rajendra Gode, RGMC Amravati, Ghatkhed, Mardi Road", "search_corpus": "351 dr. rajendra gode medical college, amravati, maharashtra amravati amravati amravati private dr rajendra gode, rgmc amravati, ghatkhed, mardi road 150"}, {"s_no": 352, "name": "Dr. Shankarrao Chavan Govt. Medical College, Nanded", "seats": 11, "lat": 19.1245, "lng": 77.2917, "district": "Nanded", "division": "Marathwada", "type": "Government", "city": "Nanded", "aliases": "SCGMC, Shankarrao Chavan Nanded, GMC Nanded, Vishnupuri, GMC, GMCH", "search_corpus": "352 dr. shankarrao chavan govt. medical college, nanded nanded nanded marathwada government scgmc, shankarrao chavan nanded, gmc nanded, vishnupuri, gmc, gmch 11"}, {"s_no": 353, "name": "Dr. Ulhas Patil Medical College & Hospital, Jalgaon", "seats": 15, "lat": 21.0389, "lng": 75.6422, "district": "Jalgaon", "division": "Nashik", "type": "Private", "city": "Jalgaon", "aliases": "DUPMC, Ulhas Patil Jalgaon, Godavari Foundation, Bhusawal Road", "search_corpus": "353 dr. ulhas patil medical college & hospital, jalgaon jalgaon jalgaon nashik private dupmc, ulhas patil jalgaon, godavari foundation, bhusawal road 15"}, {"s_no": 354, "name": "Dr. Vithalrao Vikhe Patil Foundations Medical College & Hospital, Ahilyanagar (Ahmednagar)", "seats": 15, "lat": 19.1417, "lng": 74.7189, "district": "Ahilyanagar (Ahmednagar)", "division": "Nashik", "type": "Private", "city": "Ahilyanagar (Vilad Ghat)", "aliases": "VVPF, Vikhe Patil Ahmednagar, Vilad Ghat, Ahilyanagar", "search_corpus": "354 dr. vithalrao vikhe patil foundations medical college & hospital, ahilyanagar (ahmednagar) ahilyanagar (vilad ghat) ahilyanagar (ahmednagar) nashik private vvpf, vikhe patil ahmednagar, vilad ghat, ahilyanagar 15"}, {"s_no": 355, "name": "Dr. Vasantrao Pawar Medical College, Hospital & Research Centre, Nashik (Prev. NDMVP Samaj MC)", "seats": 39, "lat": 20.0244, "lng": 73.8456, "district": "Nashik", "division": "Nashik", "type": "Private", "city": "Nashik (Adgaon)", "aliases": "MVP, Vasantrao Pawar Nashik, NDMVP Samaj, Adgaon, GMC Nashik", "search_corpus": "355 dr. vasantrao pawar medical college, hospital & research centre, nashik (prev. ndmvp samaj mc) nashik (adgaon) nashik nashik private mvp, vasantrao pawar nashik, ndmvp samaj, adgaon, gmc nashik 39"}, {"s_no": 356, "name": "ESIC MEDICAL COLLEGE AND HOSPITAL, Andheri", "seats": 50, "lat": 19.1171, "lng": 72.8654, "district": "Mumbai Suburban", "division": "Konkan", "type": "Central Govt (ESIC)", "city": "Mumbai (Andheri)", "aliases": "ESIC Andheri, ESIC Hospital MIDC, Central Govt, Subhash Nagar", "search_corpus": "356 esic medical college and hospital, andheri mumbai (andheri) mumbai suburban konkan central govt (esic) esic andheri, esic hospital midc, central govt, subhash nagar 50"}, {"s_no": 357, "name": "GOVERNMENT MEDICAL COLLEGE & HOSPITAL AMRAVATI", "seats": 100, "lat": 20.9374, "lng": 77.7596, "district": "Amravati", "division": "Amravati", "type": "Government", "city": "Amravati", "aliases": "GMC Amravati, GMCH Amravati, Irvin Hospital Amravati, District Hospital", "search_corpus": "357 government medical college & hospital amravati amravati amravati amravati government gmc amravati, gmch amravati, irvin hospital amravati, district hospital 100"}, {"s_no": 358, "name": "Government Medical College & Hospital, Baramati", "seats": 8, "lat": 18.1517, "lng": 74.5828, "district": "Pune", "division": "Pune", "type": "Government", "city": "Baramati", "aliases": "GMC Baramati, GMCH Baramati, Silver Jubilee Hospital, MIDC Baramati, GMC, GMCH", "search_corpus": "358 government medical college & hospital, baramati baramati pune pune government gmc baramati, gmch baramati, silver jubilee hospital, midc baramati, gmc, gmch 8"}, {"s_no": 359, "name": "Government Medical College Ambernath", "seats": 100, "lat": 19.2045, "lng": 73.1953, "district": "Thane", "division": "Konkan", "type": "Government", "city": "Ambernath", "aliases": "GMC Ambernath, GMCH Ambernath, Chikhloli, Ulhasnagar, Thane, GMC, GMCH", "search_corpus": "359 government medical college ambernath ambernath thane konkan government gmc ambernath, gmch ambernath, chikhloli, ulhasnagar, thane, gmc, gmch 100"}, {"s_no": 360, "name": "Government Medical College and District General Hospital, Ratnagiri", "seats": 100, "lat": 16.9902, "lng": 73.312, "district": "Ratnagiri", "division": "Konkan", "type": "Government", "city": "Ratnagiri", "aliases": "GMC Ratnagiri, GMCH Ratnagiri, Kuwarbav, Jail Road, Civil Hospital Ratnagiri, GMC, GMCH", "search_corpus": "360 government medical college and district general hospital, ratnagiri ratnagiri ratnagiri konkan government gmc ratnagiri, gmch ratnagiri, kuwarbav, jail road, civil hospital ratnagiri, gmc, gmch 100"}, {"s_no": 361, "name": "Government Medical College and Hospital, Dharashiv (Osmanabad)", "seats": 100, "lat": 18.1856, "lng": 76.0422, "district": "Dharashiv (Osmanabad)", "division": "Marathwada", "type": "Government", "city": "Dharashiv", "aliases": "GMC Osmanabad, GMC Dharashiv, GMCH Dharashiv, Civil Hospital Osmanabad, GMC, GMCH", "search_corpus": "361 government medical college and hospital, dharashiv (osmanabad) dharashiv dharashiv (osmanabad) marathwada government gmc osmanabad, gmc dharashiv, gmch dharashiv, civil hospital osmanabad, gmc, gmch 100"}, {"s_no": 362, "name": "Government Medical College and Hospital, Satara (Sadar Bazar Camp)", "seats": 8, "lat": 17.6805, "lng": 73.9934, "district": "Satara", "division": "Pune", "type": "Government", "city": "Satara", "aliases": "GMC Satara, GMCH Satara, Krantisinh Nana Patil Hospital, Sadar Bazar, GMC, GMCH", "search_corpus": "362 government medical college and hospital, satara (sadar bazar camp) satara satara pune government gmc satara, gmch satara, krantisinh nana patil hospital, sadar bazar, gmc, gmch 8"}, {"s_no": 363, "name": "Government Medical College and Hospitals, Mumbai", "seats": 50, "lat": 18.9438, "lng": 72.8347, "district": "Mumbai City", "division": "Konkan", "type": "Government", "city": "Mumbai (GT Hospital)", "aliases": "GMC Mumbai, GT Hospital, Cama Hospital, Gokuldas Tejpal, St George, CSMT, GMC, GMCH", "search_corpus": "363 government medical college and hospitals, mumbai mumbai (gt hospital) mumbai city konkan government gmc mumbai, gt hospital, cama hospital, gokuldas tejpal, st george, csmt, gmc, gmch 50"}, {"s_no": 364, "name": "Government Medical College Buldhana", "seats": 100, "lat": 20.5367, "lng": 76.1822, "district": "Buldhana", "division": "Amravati", "type": "Government", "city": "Buldhana", "aliases": "GMC Buldhana, GMCH Buldhana, District Hospital Buldhana, GMC, GMCH", "search_corpus": "364 government medical college buldhana buldhana buldhana amravati government gmc buldhana, gmch buldhana, district hospital buldhana, gmc, gmch 100"}, {"s_no": 365, "name": "Government Medical College Jalna", "seats": 100, "lat": 19.841, "lng": 75.8864, "district": "Jalna", "division": "Marathwada", "type": "Government", "city": "Jalna", "aliases": "GMC Jalna, GMCH Jalna, Sindkhed Raja Road, Civil Hospital Jalna, GMC, GMCH", "search_corpus": "365 government medical college jalna jalna jalna marathwada government gmc jalna, gmch jalna, sindkhed raja road, civil hospital jalna, gmc, gmch 100"}, {"s_no": 366, "name": "Government Medical College Washim", "seats": 100, "lat": 20.1117, "lng": 77.1356, "district": "Washim", "division": "Amravati", "type": "Government", "city": "Washim", "aliases": "GMC Washim, GMCH Washim, District Hospital Washim, GMC, GMCH", "search_corpus": "366 government medical college washim washim washim amravati government gmc washim, gmch washim, district hospital washim, gmc, gmch 100"}, {"s_no": 367, "name": "Government Medical College, Akola", "seats": 15, "lat": 20.7063, "lng": 77.0097, "district": "Akola", "division": "Amravati", "type": "Government", "city": "Akola", "aliases": "GMC Akola, GMCH Akola, Ashok Vatika, Government Medical College Akola, GMC, GMCH", "search_corpus": "367 government medical college, akola akola akola amravati government gmc akola, gmch akola, ashok vatika, government medical college akola, gmc, gmch 15"}, {"s_no": 368, "name": "Government Medical College, Alibag", "seats": 8, "lat": 18.6534, "lng": 72.8777, "district": "Raigad", "division": "Konkan", "type": "Government", "city": "Alibag", "aliases": "GMC Alibag, GMCH Alibag, RCF Usar, Raigad Civil Hospital, GMC, GMCH", "search_corpus": "368 government medical college, alibag alibag raigad konkan government gmc alibag, gmch alibag, rcf usar, raigad civil hospital, gmc, gmch 8"}, {"s_no": 369, "name": "Government Medical College, Chhatrapati Sambhajinagar (Aurangabad)", "seats": 15, "lat": 19.8829, "lng": 75.3186, "district": "Chhatrapati Sambhajinagar (Aurangabad)", "division": "Marathwada", "type": "Government", "city": "Chhatrapati Sambhajinagar", "aliases": "GMC Aurangabad, GMC Sambhajinagar, GMCH Sambhajinagar, Ghati Hospital, Panchakki, GMC, GMCH", "search_corpus": "369 government medical college, chhatrapati sambhajinagar (aurangabad) chhatrapati sambhajinagar chhatrapati sambhajinagar (aurangabad) marathwada government gmc aurangabad, gmc sambhajinagar, gmch sambhajinagar, ghati hospital, panchakki, gmc, gmch 15"}, {"s_no": 370, "name": "Government Medical College, Bhandara", "seats": 100, "lat": 21.1714, "lng": 79.6548, "district": "Bhandara", "division": "Nagpur", "type": "Government", "city": "Bhandara", "aliases": "GMC Bhandara, GMCH Bhandara, District Hospital Bhandara, GMC, GMCH", "search_corpus": "370 government medical college, bhandara bhandara bhandara nagpur government gmc bhandara, gmch bhandara, district hospital bhandara, gmc, gmch 100"}, {"s_no": 371, "name": "Government Medical College, Chandrapur", "seats": 11, "lat": 19.9575, "lng": 79.2961, "district": "Chandrapur", "division": "Nagpur", "type": "Government", "city": "Chandrapur", "aliases": "GMC Chandrapur, GMCH Chandrapur, Ramnagar, Babupeth, GMC, GMCH", "search_corpus": "371 government medical college, chandrapur chandrapur chandrapur nagpur government gmc chandrapur, gmch chandrapur, ramnagar, babupeth, gmc, gmch 11"}, {"s_no": 372, "name": "Government Medical College, Gadchiroli", "seats": 100, "lat": 20.1809, "lng": 80.0039, "district": "Gadchiroli", "division": "Nagpur", "type": "Government", "city": "Gadchiroli", "aliases": "GMC Gadchiroli, GMCH Gadchiroli, Complex Area, GMC, GMCH", "search_corpus": "372 government medical college, gadchiroli gadchiroli gadchiroli nagpur government gmc gadchiroli, gmch gadchiroli, complex area, gmc, gmch 100"}, {"s_no": 373, "name": "Government Medical College, Gondia", "seats": 11, "lat": 21.4598, "lng": 80.1961, "district": "Gondia", "division": "Nagpur", "type": "Government", "city": "Gondia", "aliases": "GMC Gondia, GMCH Gondia, KTS Hospital, Kudwa, GMC, GMCH", "search_corpus": "373 government medical college, gondia gondia gondia nagpur government gmc gondia, gmch gondia, kts hospital, kudwa, gmc, gmch 11"}, {"s_no": 374, "name": "Government Medical College, Hingoli", "seats": 100, "lat": 19.7214, "lng": 77.1492, "district": "Hingoli", "division": "Marathwada", "type": "Government", "city": "Hingoli", "aliases": "GMC Hingoli, GMCH Hingoli, District Hospital Hingoli, GMC, GMCH", "search_corpus": "374 government medical college, hingoli hingoli hingoli marathwada government gmc hingoli, gmch hingoli, district hospital hingoli, gmc, gmch 100"}, {"s_no": 375, "name": "Government Medical College, Jalgaon", "seats": 11, "lat": 21.0077, "lng": 75.5626, "district": "Jalgaon", "division": "Nashik", "type": "Government", "city": "Jalgaon", "aliases": "GMC Jalgaon, GMCH Jalgaon, Civil Hospital Jalgaon, GMC, GMCH", "search_corpus": "375 government medical college, jalgaon jalgaon jalgaon nashik government gmc jalgaon, gmch jalgaon, civil hospital jalgaon, gmc, gmch 11"}, {"s_no": 376, "name": "Government Medical College, Latur", "seats": 11, "lat": 18.4088, "lng": 76.5604, "district": "Latur", "division": "Marathwada", "type": "Government", "city": "Latur", "aliases": "GMC Latur, GMCH Latur, Vilasrao Deshmukh Hospital, Subhash Nagar, GMC, GMCH", "search_corpus": "376 government medical college, latur latur latur marathwada government gmc latur, gmch latur, vilasrao deshmukh hospital, subhash nagar, gmc, gmch 11"}, {"s_no": 377, "name": "Government Medical College, Miraj", "seats": 15, "lat": 16.8286, "lng": 74.6467, "district": "Sangli", "division": "Pune", "type": "Government", "city": "Miraj", "aliases": "GMC Miraj, GMCH Miraj, Wanless, Sangli Civil Hospital, Pandharpur Road, GMC, GMCH", "search_corpus": "377 government medical college, miraj miraj sangli pune government gmc miraj, gmch miraj, wanless, sangli civil hospital, pandharpur road, gmc, gmch 15"}, {"s_no": 378, "name": "Government Medical College, Nagpur", "seats": 19, "lat": 21.1343, "lng": 79.0982, "district": "Nagpur", "division": "Nagpur", "type": "Government", "city": "Nagpur", "aliases": "GMC Nagpur, GMCH Nagpur, Medical Square, Hanuman Nagar, Medical College Nagpur, GMC, GMCH", "search_corpus": "378 government medical college, nagpur nagpur nagpur nagpur government gmc nagpur, gmch nagpur, medical square, hanuman nagar, medical college nagpur, gmc, gmch 19"}, {"s_no": 379, "name": "Government Medical College, Nandurbar", "seats": 8, "lat": 21.3686, "lng": 74.2389, "district": "Nandurbar", "division": "Nashik", "type": "Government", "city": "Nandurbar", "aliases": "GMC Nandurbar, GMCH Nandurbar, Civil Hospital Nandurbar, GMC, GMCH", "search_corpus": "379 government medical college, nandurbar nandurbar nandurbar nashik government gmc nandurbar, gmch nandurbar, civil hospital nandurbar, gmc, gmch 8"}, {"s_no": 380, "name": "Government Medical College, Nashik & Maharashtra Post Graduate Institute of Medical Sciences", "seats": 50, "lat": 19.9975, "lng": 73.7898, "district": "Nashik", "division": "Nashik", "type": "Government", "city": "Nashik", "aliases": "GMC Nashik, MPGI Nashik, Maharashtra Post Graduate Institute, Civil Hospital Nashik, GMC, GMCH", "search_corpus": "380 government medical college, nashik & maharashtra post graduate institute of medical sciences nashik nashik nashik government gmc nashik, mpgi nashik, maharashtra post graduate institute, civil hospital nashik, gmc, gmch 50"}, {"s_no": 381, "name": "GOVERNMENT MEDICAL COLLEGE, SINDHUDURG", "seats": 8, "lat": 16.1417, "lng": 73.6933, "district": "Sindhudurg", "division": "Konkan", "type": "Government", "city": "Sindhudurg (Oros)", "aliases": "GMC Sindhudurg, GMCH Sindhudurg, Oros, Sindhudurgnagari", "search_corpus": "381 government medical college, sindhudurg sindhudurg (oros) sindhudurg konkan government gmc sindhudurg, gmch sindhudurg, oros, sindhudurgnagari 8"}, {"s_no": 382, "name": "GOVERNMENT MEDICAL COLLEGE, PARBHANI", "seats": 100, "lat": 19.2785, "lng": 76.7792, "district": "Parbhani", "division": "Marathwada", "type": "Government", "city": "Parbhani", "aliases": "GMC Parbhani, GMCH Parbhani, Jintur Road, ITI Campus", "search_corpus": "382 government medical college, parbhani parbhani parbhani marathwada government gmc parbhani, gmch parbhani, jintur road, iti campus 100"}, {"s_no": 383, "name": "Grant Medical College, Mumbai", "seats": 19, "lat": 18.9632, "lng": 72.8338, "district": "Mumbai City", "division": "Konkan", "type": "Government", "city": "Mumbai (Byculla)", "aliases": "Grant Medical College, JJ Hospital, Sir JJ Group of Hospitals, Byculla, GMC Mumbai, J.J.", "search_corpus": "383 grant medical college, mumbai mumbai (byculla) mumbai city konkan government grant medical college, jj hospital, sir jj group of hospitals, byculla, gmc mumbai, j.j. 19"}, {"s_no": 384, "name": "H.B.T. Medical College & Dr. R.N. Cooper Municipal General Hospital, Juhu, Mumbai", "seats": 15, "lat": 19.1082, "lng": 72.8361, "district": "Mumbai Suburban", "division": "Konkan", "type": "Municipal Corp (MCGM)", "city": "Mumbai (Juhu/Vile Parle)", "aliases": "Cooper Hospital, HBT Medical College, HBTMC, Juhu, Vile Parle, RN Cooper", "search_corpus": "384 h.b.t. medical college & dr. r.n. cooper municipal general hospital, juhu, mumbai mumbai (juhu/vile parle) mumbai suburban konkan municipal corp (mcgm) cooper hospital, hbt medical college, hbtmc, juhu, vile parle, rn cooper 15"}, {"s_no": 385, "name": "Indian Institute of Medical Science & Research, Jalna", "seats": 11, "lat": 19.8722, "lng": 75.7258, "district": "Jalna", "division": "Marathwada", "type": "Private (Minority)", "city": "Badnapur (Jalna)", "aliases": "IIMSR, Noor Hospital, Badnapur Jalna, Warudi", "search_corpus": "385 indian institute of medical science & research, jalna badnapur (jalna) jalna marathwada private (minority) iimsr, noor hospital, badnapur jalna, warudi 11"}, {"s_no": 386, "name": "Indira Gandhi Medical College & Hospital, Nagpur", "seats": 15, "lat": 21.1554, "lng": 79.0949, "district": "Nagpur", "division": "Nagpur", "type": "Government", "city": "Nagpur (Mayo)", "aliases": "IGGMC, IGMC Nagpur, Mayo Hospital, Central Avenue Road, Indira Gandhi Nagpur", "search_corpus": "386 indira gandhi medical college & hospital, nagpur nagpur (mayo) nagpur nagpur government iggmc, igmc nagpur, mayo hospital, central avenue road, indira gandhi nagpur 15"}, {"s_no": 387, "name": "Jawaharlal Nehru Medical College, Sawangi (Meghe), Wardha", "seats": 19, "lat": 20.7183, "lng": 78.5714, "district": "Wardha", "division": "Nagpur", "type": "Deemed", "city": "Sawangi (Wardha)", "aliases": "JNMC Wardha, Jawaharlal Nehru Sawangi Meghe, Datta Meghe Wardha", "search_corpus": "387 jawaharlal nehru medical college, sawangi (meghe), wardha sawangi (wardha) wardha nagpur deemed jnmc wardha, jawaharlal nehru sawangi meghe, datta meghe wardha 19"}, {"s_no": 388, "name": "K J SOMAIYYA MEDICAL COLLEGE AND RESEARCH CENTRE  MUMBAI", "seats": 8, "lat": 19.0469, "lng": 72.8755, "district": "Mumbai Suburban", "division": "Konkan", "type": "Private (Trust)", "city": "Mumbai (Sion East)", "aliases": "Somaiya, KJ Somaiya Sion East, Ayurvihar, Chunabhatti, Somaiya Medical", "search_corpus": "388 k j somaiyya medical college and research centre  mumbai mumbai (sion east) mumbai suburban konkan private (trust) somaiya, kj somaiya sion east, ayurvihar, chunabhatti, somaiya medical 8"}, {"s_no": 389, "name": "Krishna Institute of Medical Sciences, Karad", "seats": 19, "lat": 17.2694, "lng": 74.1784, "district": "Satara", "division": "Pune", "type": "Deemed", "city": "Karad", "aliases": "KIMS Karad, Krishna Karad, Malkapur, Krishna Institute", "search_corpus": "389 krishna institute of medical sciences, karad karad satara pune deemed kims karad, krishna karad, malkapur, krishna institute 19"}, {"s_no": 390, "name": "Lokmanya Tilak Municipal Medical College, Sion, Mumbai", "seats": 15, "lat": 19.0366, "lng": 72.8601, "district": "Mumbai City", "division": "Konkan", "type": "Municipal Corp (MCGM)", "city": "Mumbai (Sion)", "aliases": "Sion Hospital, LTMMC, Lokmanya Tilak Sion, LTMGH, Sion West", "search_corpus": "390 lokmanya tilak municipal medical college, sion, mumbai mumbai (sion) mumbai city konkan municipal corp (mcgm) sion hospital, ltmmc, lokmanya tilak sion, ltmgh, sion west 15"}, {"s_no": 391, "name": "Maharashtra Institute of Medical Sciences & Research, Latur", "seats": 11, "lat": 18.4189, "lng": 76.5861, "district": "Latur", "division": "Marathwada", "type": "Private", "city": "Latur", "aliases": "MIMSR Latur, Vishwanathpuram, Ambajogai Road, MAEER Latur", "search_corpus": "391 maharashtra institute of medical sciences & research, latur latur latur marathwada private mimsr latur, vishwanathpuram, ambajogai road, maeer latur 11"}, {"s_no": 392, "name": "Maharashtra Institute of Medical Education & Research, Talegaon,Pune", "seats": 11, "lat": 18.7303, "lng": 73.6738, "district": "Pune", "division": "Pune", "type": "Private", "city": "Talegaon Dabhade", "aliases": "MIMER Talegaon, Talegaon Dabhade, Pune, MAEER MIMER", "search_corpus": "392 maharashtra institute of medical education & research, talegaon,pune talegaon dabhade pune pune private mimer talegaon, talegaon dabhade, pune, maeer mimer 11"}, {"s_no": 393, "name": "Mahatma Gandhi Institute of Medical Sciences, Sevagram, Wardha", "seats": 8, "lat": 20.7126, "lng": 78.6617, "district": "Wardha", "division": "Nagpur", "type": "Semi-Govt (Trust)", "city": "Sevagram (Wardha)", "aliases": "MGIMS Sevagram, Kasturba Hospital, Wardha, Mahatma Gandhi Sevagram", "search_corpus": "393 mahatma gandhi institute of medical sciences, sevagram, wardha sevagram (wardha) wardha nagpur semi-govt (trust) mgims sevagram, kasturba hospital, wardha, mahatma gandhi sevagram 8"}, {"s_no": 394, "name": "Mahatma Gandhi Missions Medical College, Chhatrapati Sambhajinagar (Aurangabad)", "seats": 111, "lat": 19.8687, "lng": 75.3622, "district": "Chhatrapati Sambhajinagar (Aurangabad)", "division": "Marathwada", "type": "Deemed", "city": "Chhatrapati Sambhajinagar (CIDCO)", "aliases": "MGM Aurangabad, MGM Sambhajinagar, CIDCO, N-6", "search_corpus": "394 mahatma gandhi missions medical college, chhatrapati sambhajinagar (aurangabad) chhatrapati sambhajinagar (cidco) chhatrapati sambhajinagar (aurangabad) marathwada deemed mgm aurangabad, mgm sambhajinagar, cidco, n-6 111"}, {"s_no": 395, "name": "MAHATMA GANDHI MISSIONS MEDICAL COLLEGE, KAMOTHE", "seats": 61, "lat": 19.0224, "lng": 73.0906, "district": "Raigad", "division": "Konkan", "type": "Deemed", "city": "Navi Mumbai (Kamothe)", "aliases": "MGM Kamothe, MGM Navi Mumbai, Sector 1 Kamothe, Mansarovar", "search_corpus": "395 mahatma gandhi missions medical college, kamothe navi mumbai (kamothe) raigad konkan deemed mgm kamothe, mgm navi mumbai, sector 1 kamothe, mansarovar 61"}, {"s_no": 396, "name": "Mahatma Gandhi Missions Medical College, Panvel", "seats": 100, "lat": 18.9894, "lng": 73.1175, "district": "Raigad", "division": "Konkan", "type": "Deemed", "city": "Navi Mumbai (Panvel)", "aliases": "MGM Panvel, MGM Hospital Panvel, Kalamboli", "search_corpus": "396 mahatma gandhi missions medical college, panvel navi mumbai (panvel) raigad konkan deemed mgm panvel, mgm hospital panvel, kalamboli 100"}, {"s_no": 397, "name": "MALATI MULTISPECIALITY HOSPITAL AND MEDICAL COLLEGE", "seats": 50, "lat": 20.7319, "lng": 77.3622, "district": "Akola", "division": "Amravati", "type": "Private", "city": "Murtizapur (Akola)", "aliases": "Malati Multispeciality Akola, MMC Turkhed, Murtizapur, Karanja Road", "search_corpus": "397 malati multispeciality hospital and medical college murtizapur (akola) akola amravati private malati multispeciality akola, mmc turkhed, murtizapur, karanja road 50"}, {"s_no": 398, "name": "MGM Medical College, Vashi, Navi Mumbai", "seats": 100, "lat": 19.0734, "lng": 72.9978, "district": "Thane", "division": "Konkan", "type": "Deemed", "city": "Navi Mumbai (Vashi)", "aliases": "MGM Vashi, MGM Hospital Vashi, Sector 3 Vashi, Navi Mumbai", "search_corpus": "398 mgm medical college, vashi, navi mumbai navi mumbai (vashi) thane konkan deemed mgm vashi, mgm hospital vashi, sector 3 vashi, navi mumbai 100"}, {"s_no": 399, "name": "MGM Medical College,Nerul,Navi Mumbai", "seats": 50, "lat": 19.035, "lng": 73.018, "district": "Thane", "division": "Konkan", "type": "Deemed", "city": "Navi Mumbai (Nerul)", "aliases": "MGM Nerul, MGM Hospital Nerul, Sector 8 Nerul", "search_corpus": "399 mgm medical college,nerul,navi mumbai navi mumbai (nerul) thane konkan deemed mgm nerul, mgm hospital nerul, sector 8 nerul 50"}, {"s_no": 400, "name": "N. K. P. Salve Institute of Medical Sciences & Research Centre and Lata Mangeshkar Hospital, Nagpur", "seats": 65, "lat": 21.1177, "lng": 78.9934, "district": "Nagpur", "division": "Nagpur", "type": "Private", "city": "Nagpur (Digdoh Hills)", "aliases": "NKP Salve, NKPSIMS, Lata Mangeshkar Hospital Nagpur, Digdoh Hills, Hingna", "search_corpus": "400 n. k. p. salve institute of medical sciences & research centre and lata mangeshkar hospital, nagpur nagpur (digdoh hills) nagpur nagpur private nkp salve, nkpsims, lata mangeshkar hospital nagpur, digdoh hills, hingna 65"}, {"s_no": 401, "name": "Padmashree Dr. D.Y.Patil Medical College, Navi Mumbai", "seats": 19, "lat": 19.0416, "lng": 73.0232, "district": "Thane", "division": "Konkan", "type": "Deemed", "city": "Navi Mumbai (Nerul)", "aliases": "DY Patil Medical College Nerul, Padmashree DY Patil Navi Mumbai, Sector 7", "search_corpus": "401 padmashree dr. d.y.patil medical college, navi mumbai navi mumbai (nerul) thane konkan deemed dy patil medical college nerul, padmashree dy patil navi mumbai, sector 7 19"}, {"s_no": 402, "name": "PARBHANI MEDICAL COLLEGE, PARBHANI", "seats": 150, "lat": 19.255, "lng": 76.685, "district": "Parbhani", "division": "Marathwada", "type": "Private", "city": "Parbhani (Pedgaon)", "aliases": "Parbhani Medical College, PMC Parbhani, RP Hospital, Pedgaon, Manvat Road", "search_corpus": "402 parbhani medical college, parbhani parbhani (pedgaon) parbhani marathwada private parbhani medical college, pmc parbhani, rp hospital, pedgaon, manvat road 150"}, {"s_no": 403, "name": "Prakash Institute of Medical Sciences & Research, Sangli", "seats": 11, "lat": 17.0425, "lng": 74.275, "district": "Sangli", "division": "Pune", "type": "Private", "city": "Islampur (Sangli)", "aliases": "Prakash Institute Islampur, PIMS Sangli, Walwa, Urun Islampur", "search_corpus": "403 prakash institute of medical sciences & research, sangli islampur (sangli) sangli pune private prakash institute islampur, pims sangli, walwa, urun islampur 11"}, {"s_no": 404, "name": "Rajashree Chatrapati Shahu Maharaj Government Medical College, Kolhapur", "seats": 11, "lat": 16.6989, "lng": 74.2289, "district": "Kolhapur", "division": "Pune", "type": "Government", "city": "Kolhapur (CPR Hospital)", "aliases": "CPR Hospital, RCSMGMC Kolhapur, Shahu Maharaj GMC, Dasara Chowk, Bhausingji Road, GMC, GMCH", "search_corpus": "404 rajashree chatrapati shahu maharaj government medical college, kolhapur kolhapur (cpr hospital) kolhapur pune government cpr hospital, rcsmgmc kolhapur, shahu maharaj gmc, dasara chowk, bhausingji road, gmc, gmch 11"}, {"s_no": 405, "name": "Rajiv Gandhi Medical College and Chhatrapati Shivaji Maharaj Hospital, Thane", "seats": 8, "lat": 19.1983, "lng": 72.9961, "district": "Thane", "division": "Konkan", "type": "Municipal Corp (TMC)", "city": "Thane (Kalwa)", "aliases": "RGMC Kalwa, CSMH Kalwa, Rajiv Gandhi Thane, Chhatrapati Shivaji Maharaj Hospital", "search_corpus": "405 rajiv gandhi medical college and chhatrapati shivaji maharaj hospital, thane thane (kalwa) thane konkan municipal corp (tmc) rgmc kalwa, csmh kalwa, rajiv gandhi thane, chhatrapati shivaji maharaj hospital 8"}, {"s_no": 406, "name": "Rural Medical College, PIMS, Loni, Ahilyanagar (Ahmednagar)", "seats": 15, "lat": 19.5847, "lng": 74.4536, "district": "Ahilyanagar (Ahmednagar)", "division": "Nashik", "type": "Deemed", "city": "Loni (Ahilyanagar)", "aliases": "Rural Medical College Loni, PIMS Loni, Pravara Medical College, Rahata, Ahilyanagar", "search_corpus": "406 rural medical college, pims, loni, ahilyanagar (ahmednagar) loni (ahilyanagar) ahilyanagar (ahmednagar) nashik deemed rural medical college loni, pims loni, pravara medical college, rahata, ahilyanagar 15"}, {"s_no": 407, "name": "Seth GS Medical College and KEM Hospital, Mumbai", "seats": 19, "lat": 18.9995, "lng": 72.8427, "district": "Mumbai City", "division": "Konkan", "type": "Municipal Corp (MCGM)", "city": "Mumbai (Parel)", "aliases": "KEM Hospital, Seth GS, GSMC, Parel, KEM Mumbai, King Edward Memorial", "search_corpus": "407 seth gs medical college and kem hospital, mumbai mumbai (parel) mumbai city konkan municipal corp (mcgm) kem hospital, seth gs, gsmc, parel, kem mumbai, king edward memorial 19"}, {"s_no": 408, "name": "Shri Vasant Rao Naik Govt. Medical College, Yavatmal", "seats": 15, "lat": 20.3953, "lng": 78.1256, "district": "Yavatmal", "division": "Amravati", "type": "Government", "city": "Yavatmal", "aliases": "SVNGMC, Vasantrao Naik Yavatmal, GMC Yavatmal, Civil Hospital Yavatmal, GMC, GMCH", "search_corpus": "408 shri vasant rao naik govt. medical college, yavatmal yavatmal yavatmal amravati government svngmc, vasantrao naik yavatmal, gmc yavatmal, civil hospital yavatmal, gmc, gmch 15"}, {"s_no": 409, "name": "Sindhudurg Shikshan Prasarak Mandal (SSPM) Medical College & Lifetime Hospital, Padave, Sindhudurg", "seats": 10, "lat": 16.275, "lng": 73.715, "district": "Sindhudurg", "division": "Konkan", "type": "Private", "city": "Kankavli (Padave)", "aliases": "SSPM Sindhudurg, SSPM Padave, Kankavli, Lifetime Hospital Sindhudurg", "search_corpus": "409 sindhudurg shikshan prasarak mandal (sspm) medical college & lifetime hospital, padave, sindhudurg kankavli (padave) sindhudurg konkan private sspm sindhudurg, sspm padave, kankavli, lifetime hospital sindhudurg 10"}, {"s_no": 410, "name": "SMBT Institute of Medical Sciences & Research Centre, Nandihills, Nashik", "seats": 11, "lat": 19.7853, "lng": 73.6542, "district": "Nashik", "division": "Nashik", "type": "Private", "city": "Igatpuri (Nandihills)", "aliases": "SMBT Nashik, SMBT Igatpuri, Nandihills, Dhamangaon, Ghoti", "search_corpus": "410 smbt institute of medical sciences & research centre, nandihills, nashik igatpuri (nandihills) nashik nashik private smbt nashik, smbt igatpuri, nandihills, dhamangaon, ghoti 11"}, {"s_no": 411, "name": "Smt Sakhubai Narayanrao Katkade Medical College & Research Center, Kopargaon", "seats": 100, "lat": 19.8894, "lng": 74.4789, "district": "Ahilyanagar (Ahmednagar)", "division": "Nashik", "type": "Private", "city": "Kopargaon (Ahilyanagar)", "aliases": "Katkade Medical College, SSNKMC Kokamthan, Kopargaon, Shirdi, Ahilyanagar", "search_corpus": "411 smt sakhubai narayanrao katkade medical college & research center, kopargaon kopargaon (ahilyanagar) ahilyanagar (ahmednagar) nashik private katkade medical college, ssnkmc kokamthan, kopargaon, shirdi, ahilyanagar 100"}, {"s_no": 412, "name": "Smt. Kashibai Navale Medical College and General Hospital,Pune", "seats": 11, "lat": 18.4608, "lng": 73.8344, "district": "Pune", "division": "Pune", "type": "Private", "city": "Pune (Narhe)", "aliases": "Kashibai Navale, SKNMC Pune, Narhe Ambegaon, Sinhgad, Navale Hospital", "search_corpus": "412 smt. kashibai navale medical college and general hospital,pune pune (narhe) pune pune private kashibai navale, sknmc pune, narhe ambegaon, sinhgad, navale hospital 11"}, {"s_no": 413, "name": "Sri Bhausaheb Hire Government Medical College, Dhule", "seats": 11, "lat": 20.8524, "lng": 74.7731, "district": "Dhule", "division": "Nashik", "type": "Government", "city": "Dhule (Chakkarbardi)", "aliases": "SBHGMC, Bhausaheb Hire Dhule, GMC Dhule, Chakkarbardi, GMC, GMCH", "search_corpus": "413 sri bhausaheb hire government medical college, dhule dhule (chakkarbardi) dhule nashik government sbhgmc, bhausaheb hire dhule, gmc dhule, chakkarbardi, gmc, gmch 11"}, {"s_no": 414, "name": "Sri Ramachandra Institute of Medical Sciences, Chhatrapati Sambhajinagar (Aurangabad)", "seats": 150, "lat": 19.851, "lng": 75.334, "district": "Chhatrapati Sambhajinagar (Aurangabad)", "division": "Marathwada", "type": "Private", "city": "Chhatrapati Sambhajinagar (Beed Bypass)", "aliases": "SRIMS Sambhajinagar, Hedgewar Hospital, Damani Medical College, Beed Bypass", "search_corpus": "414 sri ramachandra institute of medical sciences, chhatrapati sambhajinagar (aurangabad) chhatrapati sambhajinagar (beed bypass) chhatrapati sambhajinagar (aurangabad) marathwada private srims sambhajinagar, hedgewar hospital, damani medical college, beed bypass 150"}, {"s_no": 415, "name": "SRTR Government Medical College, Ambajogai, Beed", "seats": 11, "lat": 18.7297, "lng": 76.3861, "district": "Beed", "division": "Marathwada", "type": "Government", "city": "Ambajogai (Beed)", "aliases": "SRTR Ambajogai, Swami Ramanand Teerth, SRTR GMC, Ambajogai Beed, GMC, GMCH", "search_corpus": "415 srtr government medical college, ambajogai, beed ambajogai (beed) beed marathwada government srtr ambajogai, swami ramanand teerth, srtr gmc, ambajogai beed, gmc, gmch 11"}, {"s_no": 416, "name": "Symbiosis Medical College for Women, Pune", "seats": 11, "lat": 18.5447, "lng": 73.7389, "district": "Pune", "division": "Pune", "type": "Deemed", "city": "Pune (Lavale)", "aliases": "Symbiosis Pune, SMCW Lavale, Symbiosis Women Medical College, Mulshi", "search_corpus": "416 symbiosis medical college for women, pune pune (lavale) pune pune deemed symbiosis pune, smcw lavale, symbiosis women medical college, mulshi 11"}, {"s_no": 417, "name": "Terna Medical College, Navi Mumbai", "seats": 58, "lat": 19.0338, "lng": 73.0185, "district": "Thane", "division": "Konkan", "type": "Private", "city": "Navi Mumbai (Nerul)", "aliases": "Terna Nerul, Terna Medical College Navi Mumbai, Sector 12 Nerul", "search_corpus": "417 terna medical college, navi mumbai navi mumbai (nerul) thane konkan private terna nerul, terna medical college navi mumbai, sector 12 nerul 58"}, {"s_no": 418, "name": "Topiwala National Medical College, Mumbai", "seats": 11, "lat": 18.9715, "lng": 72.8197, "district": "Mumbai City", "division": "Konkan", "type": "Municipal Corp (MCGM)", "city": "Mumbai (Mumbai Central)", "aliases": "Nair Hospital, TNMC, Topiwala National Mumbai, BYL Nair, Mumbai Central", "search_corpus": "418 topiwala national medical college, mumbai mumbai (mumbai central) mumbai city konkan municipal corp (mcgm) nair hospital, tnmc, topiwala national mumbai, byl nair, mumbai central 11"}, {"s_no": 419, "name": "Vedantaa Institute of Medical Sciences, Palghar, Maharashtra", "seats": 11, "lat": 19.9882, "lng": 72.8542, "district": "Palghar", "division": "Konkan", "type": "Private", "city": "Palghar (Dahanu)", "aliases": "Vedantaa Palghar, Vedantaa Dahanu, Dhundalwadi, VIMS Palghar", "search_corpus": "419 vedantaa institute of medical sciences, palghar, maharashtra palghar (dahanu) palghar konkan private vedantaa palghar, vedantaa dahanu, dhundalwadi, vims palghar 11"}];
+        const districtList = [{"district": "Ahilyanagar (Ahmednagar)", "clean_name": "Ahilyanagar", "count": 3, "seats": 130}, {"district": "Akola", "clean_name": "Akola", "count": 2, "seats": 65}, {"district": "Amravati", "clean_name": "Amravati", "count": 3, "seats": 261}, {"district": "Beed", "clean_name": "Beed", "count": 1, "seats": 11}, {"district": "Bhandara", "clean_name": "Bhandara", "count": 1, "seats": 100}, {"district": "Buldhana", "clean_name": "Buldhana", "count": 1, "seats": 100}, {"district": "Chandrapur", "clean_name": "Chandrapur", "count": 1, "seats": 11}, {"district": "Chhatrapati Sambhajinagar (Aurangabad)", "clean_name": "Chhatrapati Sambhajinagar", "count": 3, "seats": 276}, {"district": "Dharashiv (Osmanabad)", "clean_name": "Dharashiv", "count": 1, "seats": 100}, {"district": "Dhule", "clean_name": "Dhule", "count": 2, "seats": 111}, {"district": "Gadchiroli", "clean_name": "Gadchiroli", "count": 1, "seats": 100}, {"district": "Gondia", "clean_name": "Gondia", "count": 1, "seats": 11}, {"district": "Hingoli", "clean_name": "Hingoli", "count": 1, "seats": 100}, {"district": "Jalgaon", "clean_name": "Jalgaon", "count": 2, "seats": 26}, {"district": "Jalna", "clean_name": "Jalna", "count": 2, "seats": 111}, {"district": "Kolhapur", "clean_name": "Kolhapur", "count": 2, "seats": 22}, {"district": "Latur", "clean_name": "Latur", "count": 2, "seats": 22}, {"district": "Mumbai City", "clean_name": "Mumbai City", "count": 5, "seats": 114}, {"district": "Mumbai Suburban", "clean_name": "Mumbai Suburban", "count": 3, "seats": 73}, {"district": "Nagpur", "clean_name": "Nagpur", "count": 4, "seats": 210}, {"district": "Nanded", "clean_name": "Nanded", "count": 1, "seats": 11}, {"district": "Nandurbar", "clean_name": "Nandurbar", "count": 1, "seats": 8}, {"district": "Nashik", "clean_name": "Nashik", "count": 3, "seats": 100}, {"district": "Palghar", "clean_name": "Palghar", "count": 1, "seats": 11}, {"district": "Parbhani", "clean_name": "Parbhani", "count": 2, "seats": 250}, {"district": "Pune", "clean_name": "Pune", "count": 9, "seats": 209}, {"district": "Raigad", "clean_name": "Raigad", "count": 4, "seats": 177}, {"district": "Ratnagiri", "clean_name": "Ratnagiri", "count": 2, "seats": 111}, {"district": "Sangli", "clean_name": "Sangli", "count": 3, "seats": 137}, {"district": "Satara", "clean_name": "Satara", "count": 2, "seats": 27}, {"district": "Sindhudurg", "clean_name": "Sindhudurg", "count": 2, "seats": 18}, {"district": "Solapur", "clean_name": "Solapur", "count": 2, "seats": 73}, {"district": "Thane", "clean_name": "Thane", "count": 7, "seats": 435}, {"district": "Wardha", "clean_name": "Wardha", "count": 2, "seats": 27}, {"district": "Washim", "clean_name": "Washim", "count": 1, "seats": 100}, {"district": "Yavatmal", "clean_name": "Yavatmal", "count": 1, "seats": 15}];
+
+        // Storage keys
+        const STORAGE_KEY = "MH_CRMI_CROWDSOURCED_REVIEWS_V4";
+        const PREF_STORAGE_KEY = "MH_CRMI_PREFERENCE_LIST_V4";
+
+        function getLocalReviews() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                return raw ? JSON.parse(raw) : {};
+            } catch(e) {
+                return {};
+            }
+        }
+
+        function saveLocalReviews(reviews) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(reviews));
+        }
+
+        function getPreferences() {
+            try {
+                const raw = localStorage.getItem(PREF_STORAGE_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function savePreferences(list) {
+            localStorage.setItem(PREF_STORAGE_KEY, JSON.stringify(list));
+            updatePreferenceBadge();
+        }
+
+        function updatePreferenceBadge() {
+            const list = getPreferences();
+            document.getElementById('prefBadgeCount').innerText = list.length;
+        }
+
+        // Populate District Filter Dropdown
+        const districtSelectEl = document.getElementById('districtSelect');
+        districtList.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.district;
+            opt.innerText = `${d.clean_name} (${d.count} Col • ${d.seats} Seats)`;
+            districtSelectEl.appendChild(opt);
+        });
+
+        // Initialize Map
+        const map = L.map('map', {
+            center: [19.25, 75.8],
+            zoom: 7,
+            zoomControl: false,
+            attributionControl: false
+        });
+
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        // Tile Layers
+        const googleHybridLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        });
+
+        const googleStreetsLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        });
+
+        const esriSatelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19
+        });
+
+        googleHybridLayer.addTo(map);
+        let activeBaseLayer = googleHybridLayer;
+
+        function toggleLayerMenu() {
+            document.getElementById('layerMenu').classList.toggle('active');
+        }
+
+        function selectTileLayer(type) {
+            document.querySelectorAll('.layer-option').forEach(el => el.classList.remove('selected'));
+            map.removeLayer(activeBaseLayer);
+
+            if (type === 'google_hybrid') {
+                googleHybridLayer.addTo(map);
+                activeBaseLayer = googleHybridLayer;
+                document.getElementById('opt_google_hybrid').classList.add('selected');
+            } else if (type === 'google_streets') {
+                googleStreetsLayer.addTo(map);
+                activeBaseLayer = googleStreetsLayer;
+                document.getElementById('opt_google_streets').classList.add('selected');
+            } else if (type === 'esri_satellite') {
+                esriSatelliteLayer.addTo(map);
+                activeBaseLayer = esriSatelliteLayer;
+                document.getElementById('opt_esri_satellite').classList.add('selected');
+            }
+            document.getElementById('layerMenu').classList.remove('active');
+        }
+
+        map.on('click', () => {
+            document.getElementById('layerMenu').classList.remove('active');
+            document.getElementById('searchDropdown').classList.remove('active');
+        });
+
+        // Markers Layer
+        const markersGroup = L.layerGroup().addTo(map);
+        let activeFilter = 'All';
+        let searchQuery = '';
+
+        // CREATE CLEAN MARKER (NO MISLEADING GROSS CAPACITY ON START PAGE)
+        function createCollegeMarker(college) {
+            const reviews = getLocalReviews();
+            const rev = reviews[college.s_no];
+
+            // Clean concise name for start screen badge
+            let shortName = college.name.split(',')[0].replace('Government Medical College', 'GMC').replace('Medical College', 'MC');
+            if (shortName.length > 25) shortName = shortName.substring(0, 23) + '..';
+
+            let netTagHtml = '';
+            if (rev && rev.currentInterns !== undefined && rev.currentInterns !== '') {
+                const occupied = parseInt(rev.currentInterns) || 0;
+                const net = Math.max(0, college.seats - occupied);
+                if (net === 0) {
+                    netTagHtml = `<span class="pin-subtag tag-full">Full</span>`;
+                } else if (net <= 5) {
+                    netTagHtml = `<span class="pin-subtag tag-low">Net: ${net}</span>`;
+                } else {
+                    netTagHtml = `<span class="pin-subtag tag-vacant">Net: ${net}</span>`;
+                }
+            }
+
+            const iconHtml = `
+                <div class="college-pin-wrap" id="pin_${college.s_no}">
+                    <div class="pin-badge-clean badge-theme-blue">
+                        <i class="fa-solid fa-hospital" style="color: var(--primary);"></i>
+                        <span>${shortName}</span>
+                        ${netTagHtml}
+                    </div>
+                    <div class="pin-dot"></div>
+                </div>
+            `;
+
+            const icon = L.divIcon({
+                className: '',
+                html: iconHtml,
+                iconSize: [160, 40],
+                iconAnchor: [80, 36],
+                popupAnchor: [0, -36]
+            });
+
+            const marker = L.marker([college.lat, college.lng], { icon: icon });
+            
+            marker.bindPopup(() => renderPopupContent(college), {
+                maxWidth: 410,
+                className: 'custom-leaflet-popup'
+            });
+
+            return marker;
+        }
+
+        // RENDER POPUP WITH TRUE NET VACANCY SUBTRACTION ENGINE
+        function renderPopupContent(college) {
+            const reviews = getLocalReviews();
+            const rev = reviews[college.s_no] || {};
+            const prefList = getPreferences();
+            const isStarred = prefList.includes(college.s_no);
+
+            const gross = college.seats;
+            let occupied = (rev.currentInterns !== undefined && rev.currentInterns !== '') ? parseInt(rev.currentInterns) : null;
+            let netVacancy = occupied !== null ? Math.max(0, gross - occupied) : gross;
+            let percentOccupied = occupied !== null ? Math.min(100, Math.round((occupied / gross) * 100)) : 0;
+
+            let barColor = '#10b981';
+            if (percentOccupied >= 85) barColor = '#ef4444';
+            else if (percentOccupied >= 50) barColor = '#f59e0b';
+
+            const stipendVal = rev.stipend || '<span style="color: #64748b; font-style: italic;">Not reported yet</span>';
+            const biometricVal = rev.biometrics || '<span style="color: #64748b; font-style: italic;">Not reported yet</span>';
+            const workloadVal = rev.workload || '<span style="color: #64748b; font-style: italic;">Not reported</span>';
+            const hostelVal = rev.hostel || '<span style="color: #64748b; font-style: italic;">Not reported</span>';
+            const hiddenFeesVal = rev.hiddenFees || '<span style="color: #10b981; font-weight: 600;">₹0 / None reported</span>';
+            const livingCostVal = rev.livingCost || '<span style="color: #64748b; font-style: italic;">Not reported</span>';
+
+            // Exact verified place query for Google Maps
+            const gmapsQuery = encodeURIComponent(`${college.name}, ${college.city}, Maharashtra`);
+
+            return `
+                <div class="popup-header">
+                    <div class="header-top">
+                        <span class="sno-tag">NMC S.NO: #${college.s_no}</span>
+                        <span class="type-pill">${college.type}</span>
+                    </div>
+                    <h3>${college.name}</h3>
+                    <div class="loc-subtitle">
+                        <i class="fa-solid fa-location-dot" style="color: var(--primary);"></i>
+                        ${college.city}, ${college.district} (${college.division} Division)
+                    </div>
+                </div>
+
+                <div class="popup-body">
+                    <!-- TRUE NET VACANCY ENGINE CARD -->
+                    <div class="net-vacancy-card">
+                        <div class="vacancy-top-grid">
+                            <div class="vacancy-cell">
+                                <div class="lbl">NMC Quota (Gross)</div>
+                                <div class="num">${gross}</div>
+                            </div>
+                            <div class="vacancy-cell">
+                                <div class="lbl">Current FMGs</div>
+                                <div class="num" style="color: #f59e0b;">${occupied !== null ? occupied : '—'}</div>
+                            </div>
+                            <div class="vacancy-cell ${occupied !== null && netVacancy === 0 ? 'highlight-full' : 'highlight-net'}">
+                                <div class="lbl">${occupied !== null ? 'True Net Vacancy' : 'Base Approved'}</div>
+                                <div class="num">${netVacancy} Seats</div>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar (Idea 5) -->
+                        <div class="progress-bar-wrap">
+                            <div class="progress-fill" style="width: ${occupied !== null ? percentOccupied : 0}%; background: ${barColor};"></div>
+                        </div>
+                        <div class="progress-info">
+                            <span>${occupied !== null ? `${occupied} / ${gross} Occupied (${percentOccupied}%)` : 'Occupancy unverified by seniors'}</span>
+                            <span style="color: ${netVacancy === 0 ? '#ef4444' : '#34d399'};">${occupied !== null ? `${netVacancy} Vacancies Left` : 'Click + Update Ground Info'}</span>
+                        </div>
+                    </div>
+
+                    <!-- Ground Reality Reports -->
+                    <div class="ground-info-section">
+                        <div class="ground-header">
+                            <span><i class="fa-solid fa-users"></i> Ground Reality (Community)</span>
+                            <button class="btn btn-sm btn-accent" style="padding: 2px 8px; font-size: 10px;" onclick="openReviewModalForCollege(${college.s_no})">
+                                + Update Info
+                            </button>
+                        </div>
+                        <div class="ground-grid">
+                            <div class="ground-cell">
+                                <div class="label">Monthly Stipend</div>
+                                <div class="val">${stipendVal}</div>
+                            </div>
+                            <div class="ground-cell">
+                                <div class="label">Biometrics</div>
+                                <div class="val">${biometricVal}</div>
+                            </div>
+                            <div class="ground-cell" style="background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.2);">
+                                <div class="label" style="color: #f87171;">Hidden Fees / Demands</div>
+                                <div class="val" style="color: #fca5a5;">${hiddenFeesVal}</div>
+                            </div>
+                            <div class="ground-cell" style="background: rgba(56, 189, 248, 0.08); border-color: rgba(56, 189, 248, 0.2);">
+                                <div class="label" style="color: #38bdf8;">Average Rent / Living Cost</div>
+                                <div class="val" style="color: #bae6fd;">${livingCostVal}</div>
+                            </div>
+                            <div class="ground-cell">
+                                <div class="label">Workload</div>
+                                <div class="val">${workloadVal}</div>
+                            </div>
+                            <div class="ground-cell">
+                                <div class="label">Hostel for FMGs</div>
+                                <div class="val">${hostelVal}</div>
+                            </div>
+                        </div>
+                        ${rev.notes ? `
+                            <div style="margin-top: 8px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,0.1); font-size: 11px; color: #e2e8f0;">
+                                <i class="fa-solid fa-comment-dots" style="color: #f59e0b;"></i> "${rev.notes}"
+                                ${rev.author ? `<div style="text-align: right; color: var(--text-muted); font-size: 10px;">— ${rev.author}</div>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="popup-actions">
+                        <button class="btn btn-sm ${isStarred ? 'btn-warning' : ''}" onclick="toggleCollegePreference(${college.s_no})">
+                            <i class="fa-solid fa-star"></i> ${isStarred ? 'Shortlisted' : 'Shortlist'}
+                        </button>
+                        <button class="btn btn-sm btn-primary" onclick="setDirectionsDestination(${college.lat}, ${college.lng}, '${college.name.replace(/'/g, "\'")}')">
+                            <i class="fa-solid fa-diamond-turn-right"></i> Route
+                        </button>
+                        <!-- Exact Verified Place Link on Google Maps -->
+                        <a href="https://www.google.com/maps/search/?api=1&query=${gmapsQuery}" target="_blank" class="btn btn-sm" title="Search verified hospital entity on Google Maps">
+                            <i class="fa-brands fa-google"></i> Maps Place
+                        </a>
+                        <!-- Direct Navigation to Verified Campus Gate GPS Coordinates -->
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${college.lat},${college.lng}" target="_blank" class="btn btn-sm" title="Turn-by-turn navigation straight to campus gate">
+                            <i class="fa-solid fa-location-arrow"></i> Gate GPS
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMarkers() {
+            markersGroup.clearLayers();
+            let count = 0;
+            const q = searchQuery.toLowerCase().trim();
+
+            collegesData.forEach(c => {
+                let passFilter = true;
+                if (activeFilter === 'Konkan' && c.division !== 'Konkan') passFilter = false;
+                else if (activeFilter === 'Pune' && c.division !== 'Pune') passFilter = false;
+                else if (activeFilter === 'Nashik' && c.division !== 'Nashik') passFilter = false;
+                else if (activeFilter === 'Marathwada' && c.division !== 'Marathwada') passFilter = false;
+                else if (activeFilter === 'Vidarbha' && (c.division !== 'Nagpur' && c.division !== 'Amravati')) passFilter = false;
+                else if (activeFilter === 'Government' && !c.type.toLowerCase().includes('govt') && !c.type.toLowerCase().includes('municipal') && !c.type.toLowerCase().includes('armed')) passFilter = false;
+                else if (activeFilter === 'HighSeats' && c.seats < 50) passFilter = false;
+
+                let passSearch = true;
+                if (q) {
+                    const corpus = c.search_corpus || (c.name + ' ' + c.city + ' ' + c.district).toLowerCase();
+                    if (!corpus.includes(q)) passSearch = false;
+                }
+
+                if (passFilter && passSearch) {
+                    const m = createCollegeMarker(c);
+                    markersGroup.addLayer(m);
+                    count++;
+                }
+            });
+
+            document.getElementById('matchCount').innerText = `${count} Colleges`;
+        }
+
+        // AUTOCOMPLETE SEARCH
+        function handleSearchInput(val) {
+            searchQuery = val.trim();
+            const clearBtn = document.getElementById('clearSearchBtn');
+            const dropdown = document.getElementById('searchDropdown');
+
+            if (searchQuery.length > 0) {
+                clearBtn.style.display = 'block';
+            } else {
+                clearBtn.style.display = 'none';
+                dropdown.classList.remove('active');
+                dropdown.innerHTML = '';
+                renderMarkers();
+                if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
+                return;
+            }
+
+            const q = searchQuery.toLowerCase();
+            const matchedDistricts = districtList.filter(d => 
+                d.clean_name.toLowerCase().includes(q) || 
+                d.district.toLowerCase().includes(q)
+            );
+
+            const matchedColleges = collegesData.filter(c => {
+                const corpus = c.search_corpus || (c.name + ' ' + c.city + ' ' + c.district).toLowerCase();
+                return corpus.includes(q);
+            });
+
+            renderMarkers();
+            if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
+
+            if (matchedDistricts.length > 0 || matchedColleges.length > 0) {
+                dropdown.innerHTML = '';
+
+                if (matchedDistricts.length > 0) {
+                    matchedDistricts.slice(0, 2).forEach(d => {
+                        const distCard = document.createElement('div');
+                        distCard.className = 'search-district-card';
+                        distCard.innerHTML = `
+                            <div class="district-card-info">
+                                <div class="district-icon-badge"><i class="fa-solid fa-map-location-dot"></i></div>
+                                <div>
+                                    <div class="district-card-title">📍 Focus on ${d.clean_name} District</div>
+                                    <div class="district-card-sub">${d.count} Colleges • ${d.seats} Approved Seats</div>
+                                </div>
+                            </div>
+                            <div class="district-action-pill">View All ${d.count}</div>
+                        `;
+                        distCard.onclick = (e) => {
+                            e.stopPropagation();
+                            focusOnDistrict(d.district);
+                        };
+                        dropdown.appendChild(distCard);
+                    });
+                }
+
+                if (matchedColleges.length > 0) {
+                    const header = document.createElement('div');
+                    header.className = 'search-section-header';
+                    header.innerText = `Matching Colleges (${matchedColleges.length})`;
+                    dropdown.appendChild(header);
+
+                    matchedColleges.slice(0, 10).forEach(c => {
+                        const div = document.createElement('div');
+                        div.className = 'search-result-item';
+                        div.innerHTML = `
+                            <div style="flex: 1; min-width: 0;">
+                                <div class="item-title">${c.name}</div>
+                                <div class="item-sub">
+                                    <i class="fa-solid fa-location-dot" style="color: var(--primary);"></i>
+                                    ${c.city}, ${c.district} • <strong style="color: var(--primary);">#${c.s_no}</strong>
+                                </div>
+                            </div>
+                            <div class="item-seats">${c.seats} Seats</div>
+                        `;
+                        div.onclick = (e) => {
+                            e.stopPropagation();
+                            selectSearchResult(c.s_no);
+                        };
+                        dropdown.appendChild(div);
+                    });
+                }
+
+                dropdown.classList.add('active');
+            } else {
+                dropdown.innerHTML = `
+                    <div style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 12px;">
+                        <i class="fa-solid fa-circle-question" style="font-size: 18px; color: var(--warning); margin-bottom: 6px; display: block;"></i>
+                        No medical colleges found for "<strong>${val}</strong>".<br>
+                        <span style="font-size: 11px;">Search by district (Dhule, Nashik, Pune) or alias (JJ, Sassoon, Nair, AFMC).</span>
+                    </div>
+                `;
+                dropdown.classList.add('active');
+            }
+        }
+
+        function focusOnDistrict(distName) {
+            document.getElementById('searchDropdown').classList.remove('active');
+            const cleanName = distName.split('(')[0].trim();
+            document.getElementById('searchInput').value = cleanName;
+            document.getElementById('clearSearchBtn').style.display = 'block';
+
+            const inDist = collegesData.filter(c => 
+                c.district.toLowerCase().includes(distName.toLowerCase()) || 
+                c.district.toLowerCase().includes(cleanName.toLowerCase())
+            );
+
+            if (inDist.length === 0) return;
+
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            activeFilter = 'All';
+
+            searchQuery = cleanName.toLowerCase();
+            renderMarkers();
+
+            const latlngs = inDist.map(c => [c.lat, c.lng]);
+            if (latlngs.length === 1) {
+                map.flyTo(latlngs[0], 14, { duration: 1.4 });
+                setTimeout(() => {
+                    markersGroup.eachLayer(layer => layer.openPopup());
+                }, 1500);
+            } else {
+                const bounds = L.latLngBounds(latlngs);
+                map.fitBounds(bounds, { padding: [100, 100], maxZoom: 13, duration: 1.4 });
+                setTimeout(() => {
+                    const mainCollege = inDist.reduce((max, cur) => cur.seats > max.seats ? cur : max, inDist[0]);
+                    markersGroup.eachLayer(layer => {
+                        const ll = layer.getLatLng();
+                        if (Math.abs(ll.lat - mainCollege.lat) < 0.001 && Math.abs(ll.lng - mainCollege.lng) < 0.001) {
+                            layer.openPopup();
+                        }
+                    });
+                }, 1600);
+            }
+
+            if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
+        }
+
+        function onDistrictDropdownSelect(val) {
+            if (!val) {
+                clearSearch();
+                return;
+            }
+            focusOnDistrict(val);
+        }
+
+        function selectSearchResult(sno) {
+            const c = collegesData.find(x => x.s_no === sno);
+            if (!c) return;
+
+            document.getElementById('searchDropdown').classList.remove('active');
+            document.getElementById('searchInput').value = c.name;
+            document.getElementById('clearSearchBtn').style.display = 'block';
+
+            if (activeFilter !== 'All') {
+                document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+                document.getElementById('pillAll').classList.add('active');
+                activeFilter = 'All';
+            }
+
+            searchQuery = c.name.toLowerCase();
+            renderMarkers();
+
+            map.flyTo([c.lat, c.lng], 15, { duration: 1.4 });
+
+            setTimeout(() => {
+                markersGroup.eachLayer(layer => {
+                    const ll = layer.getLatLng();
+                    if (Math.abs(ll.lat - c.lat) < 0.001 && Math.abs(ll.lng - c.lng) < 0.001) {
+                        layer.openPopup();
+                    }
+                });
+            }, 1500);
+        }
+
+        function handleSearchKey(event) {
+            if (event.key === 'Enter') {
+                const q = searchQuery.toLowerCase().trim();
+                const matchedDist = districtList.find(d => 
+                    d.clean_name.toLowerCase() === q || 
+                    d.district.toLowerCase().includes(q)
+                );
+
+                if (matchedDist) {
+                    focusOnDistrict(matchedDist.district);
+                    return;
+                }
+
+                const matches = collegesData.filter(c => {
+                    const corpus = c.search_corpus || (c.name + ' ' + c.city).toLowerCase();
+                    return corpus.includes(q);
+                });
+                
+                if (matches.length === 1) {
+                    selectSearchResult(matches[0].s_no);
+                } else if (matches.length > 1) {
+                    const latlngs = matches.map(c => [c.lat, c.lng]);
+                    map.fitBounds(L.latLngBounds(latlngs), { padding: [60, 60] });
+                    document.getElementById('searchDropdown').classList.remove('active');
+                }
+            } else if (event.key === 'Escape') {
+                clearSearch();
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            searchQuery = '';
+            document.getElementById('clearSearchBtn').style.display = 'none';
+            document.getElementById('districtSelect').value = '';
+            const dropdown = document.getElementById('searchDropdown');
+            dropdown.classList.remove('active');
+            dropdown.innerHTML = '';
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            document.getElementById('pillAll').classList.add('active');
+            activeFilter = 'All';
+            renderMarkers();
+            resetMapBounds();
+            if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
+        }
+
+        function setDivisionFilter(div, el) {
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('districtSelect').value = '';
+            activeFilter = div;
+            renderMarkers();
+            if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
+        }
+
+        function setTypeFilter(type, el) {
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('districtSelect').value = '';
+            activeFilter = type;
+            renderMarkers();
+            if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
+        }
+
+        function setHighSeatsFilter(el) {
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('districtSelect').value = '';
+            activeFilter = 'HighSeats';
+            renderMarkers();
+            if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
+        }
+
+        function resetMapBounds() {
+            map.flyTo([19.25, 75.8], 7, { duration: 1.2 });
+        }
+
+        // PREFERENCE LIST BUILDER (IDEA 4)
+        function toggleCollegePreference(sno) {
+            let prefList = getPreferences();
+            const idx = prefList.indexOf(sno);
+            if (idx > -1) {
+                prefList.splice(idx, 1);
+            } else {
+                prefList.push(sno);
+            }
+            savePreferences(prefList);
+            renderMarkers();
+            if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
+            renderPreferencesList();
+        }
+
+        function togglePrefDrawer() {
+            const drawer = document.getElementById('prefDrawer');
+            drawer.classList.toggle('open');
+            if (drawer.classList.contains('open')) {
+                renderPreferencesList();
+            }
+        }
+
+        function renderPreferencesList() {
+            const container = document.getElementById('prefBody');
+            container.innerHTML = '';
+            const prefList = getPreferences();
+            const reviews = getLocalReviews();
+
+            document.getElementById('prefSummarySubtitle').innerText = `${prefList.length} of 84 Colleges Shortlisted`;
+
+            if (prefList.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                        <i class="fa-regular fa-star" style="font-size: 32px; color: #f59e0b; margin-bottom: 12px; display: block;"></i>
+                        <h4 style="color: #fff; font-size: 14px; margin-bottom: 6px;">No Colleges Shortlisted Yet</h4>
+                        <p style="font-size: 12px;">Click <strong>⭐ Shortlist</strong> on any college card to build your personalized counseling preference list.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            prefList.forEach((sno, index) => {
+                const c = collegesData.find(x => x.s_no === sno);
+                if (!c) return;
+
+                const rev = reviews[sno] || {};
+                const occupied = (rev.currentInterns !== undefined && rev.currentInterns !== '') ? parseInt(rev.currentInterns) : null;
+                const net = occupied !== null ? Math.max(0, c.seats - occupied) : c.seats;
+
+                const card = document.createElement('div');
+                card.className = 'pref-item-card';
+                card.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
+                            <div class="pref-rank-badge">#${index + 1}</div>
+                            <div style="min-width: 0;">
+                                <div style="font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${c.name}">
+                                    ${c.name}
+                                </div>
+                                <div style="font-size: 11px; color: var(--text-muted);">
+                                    ${c.city} • Gross: ${c.seats} • <span style="color: ${net === 0 ? '#ef4444' : '#10b981'}; font-weight: 700;">Net: ${net} Vacant</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <div class="pref-reorder-btns">
+                                <button class="reorder-btn" title="Move Up" onclick="movePreferenceItem(${index}, -1)" ${index === 0 ? 'disabled style="opacity: 0.3;"' : ''}>▲</button>
+                                <button class="reorder-btn" title="Move Down" onclick="movePreferenceItem(${index}, 1)" ${index === prefList.length - 1 ? 'disabled style="opacity: 0.3;"' : ''}>▼</button>
+                            </div>
+                            <button class="reorder-btn" style="color: #ef4444;" title="Remove" onclick="toggleCollegePreference(${sno})">✕</button>
+                        </div>
+                    </div>
+                    <!-- Preference Rank Slider (Slide to change priority rank) -->
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,0.08);">
+                        <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Slider Rank:</span>
+                        <input type="range" class="pref-rank-slider" min="1" max="${prefList.length}" value="${index + 1}"
+                               oninput="document.getElementById('pref-slider-lbl-${sno}').innerText = '#' + this.value"
+                               onchange="movePreferenceToRank(${index}, parseInt(this.value) - 1)"
+                               title="Slide to change rank position">
+                        <span id="pref-slider-lbl-${sno}" style="font-size: 11px; font-weight: 800; color: #38bdf8; min-width: 32px; text-align: right;">#${index + 1}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function movePreferenceToRank(fromIndex, toIndex) {
+            let prefList = getPreferences();
+            if (toIndex < 0 || toIndex >= prefList.length || fromIndex === toIndex) return;
+
+            const item = prefList.splice(fromIndex, 1)[0];
+            prefList.splice(toIndex, 0, item);
+
+            savePreferences(prefList);
+            renderPreferencesList();
+        }
+
+        function movePreferenceItem(index, direction) {
+            let prefList = getPreferences();
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= prefList.length) return;
+
+            const temp = prefList[index];
+            prefList[index] = prefList[newIndex];
+            prefList[newIndex] = temp;
+
+            savePreferences(prefList);
+            renderPreferencesList();
+        }
+
+        function exportPreferencesList() {
+            const prefList = getPreferences();
+            if (prefList.length === 0) {
+                alert("Please shortlist colleges first before exporting!");
+                return;
+            }
+            const reviews = getLocalReviews();
+            let text = "========================================================\n";
+            text += "MAHARASHTRA CRMI 2026-2027 COUNSELING PREFERENCE LIST\n";
+            text += "========================================================\n\n";
+
+            prefList.forEach((sno, idx) => {
+                const c = collegesData.find(x => x.s_no === sno);
+                if (c) {
+                    const rev = reviews[sno] || {};
+                    const occupied = (rev.currentInterns !== undefined && rev.currentInterns !== '') ? parseInt(rev.currentInterns) : 'Unreported';
+                    const net = typeof occupied === 'number' ? Math.max(0, c.seats - occupied) : c.seats;
+                    text += `Choice #${idx + 1}: [S.No #${c.s_no}] ${c.name}\n`;
+                    text += `   Location: ${c.city}, ${c.district} (${c.division} Division)\n`;
+                    text += `   NMC Gross Quota: ${c.seats} Seats | Current FMGs: ${occupied} | Net Vacancy: ${net}\n`;
+                    text += `   Stipend: ${rev.stipend || 'Unreported'} | Biometrics: ${rev.biometrics || 'Unreported'}\n\n`;
+                }
+            });
+
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Maharashtra_CRMI_My_Choice_Preferences_${new Date().toISOString().slice(0,10)}.txt`;
+            a.click();
+        }
+
+        // POPULATE FULL DATA TABLE
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            const reviews = getLocalReviews();
+            const prefList = getPreferences();
+            const q = searchQuery.toLowerCase().trim();
+
+            let shownCount = 0;
+            collegesData.forEach(c => {
+                if (activeFilter === 'Konkan' && c.division !== 'Konkan') return;
+                if (activeFilter === 'Pune' && c.division !== 'Pune') return;
+                if (activeFilter === 'Nashik' && c.division !== 'Nashik') return;
+                if (activeFilter === 'Marathwada' && c.division !== 'Marathwada') return;
+                if (activeFilter === 'Vidarbha' && (c.division !== 'Nagpur' && c.division !== 'Amravati')) return;
+                if (activeFilter === 'Government' && !c.type.toLowerCase().includes('govt') && !c.type.toLowerCase().includes('municipal') && !c.type.toLowerCase().includes('armed')) return;
+                if (activeFilter === 'HighSeats' && c.seats < 50) return;
+
+                if (q) {
+                    const corpus = c.search_corpus || (c.name + ' ' + c.city + ' ' + c.district).toLowerCase();
+                    if (!corpus.includes(q)) return;
+                }
+
+                shownCount++;
+                const rev = reviews[c.s_no] || {};
+                const occupied = (rev.currentInterns !== undefined && rev.currentInterns !== '') ? parseInt(rev.currentInterns) : null;
+                const net = occupied !== null ? Math.max(0, c.seats - occupied) : c.seats;
+                const isStarred = prefList.includes(c.s_no);
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight: 700; color: var(--primary);">#${c.s_no}</td>
+                    <td style="font-weight: 600; color: #fff;">${c.name}</td>
+                    <td style="text-align: center; font-family: 'JetBrains Mono'; font-weight: 700; color: #94a3b8;">${c.seats}</td>
+                    <td style="text-align: center; font-family: 'JetBrains Mono'; font-weight: 700; color: #f59e0b;">${occupied !== null ? occupied : '—'}</td>
+                    <td style="text-align: center; font-family: 'JetBrains Mono'; font-weight: 800; font-size: 14px; color: ${net === 0 ? '#ef4444' : '#10b981'};">
+                        ${occupied !== null ? net : `${c.seats}*`}
+                    </td>
+                    <td>${c.district}</td>
+                    <td style="color: #34d399; font-weight: 600;">${rev.stipend || '—'}</td>
+                    <td style="color: #cbd5e1;">${rev.biometrics || '—'}</td>
+                    <td style="color: #f87171;">${rev.hiddenFees || '—'}</td>
+                    <td style="color: #38bdf8;">${rev.livingCost || '—'}</td>
+                    <td style="text-align: center; display: flex; gap: 4px; justify-content: center;">
+                        <button class="btn btn-sm ${isStarred ? 'btn-warning' : ''}" style="padding: 4px 6px;" title="Shortlist" onclick="toggleCollegePreference(${c.s_no})">
+                            <i class="fa-solid fa-star"></i>
+                        </button>
+                        <button class="btn btn-sm btn-primary" style="padding: 4px 8px;" onclick="flyToCollege(${c.s_no})">
+                            <i class="fa-solid fa-location-crosshairs"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-accent" style="padding: 4px 8px;" onclick="openReviewModalForCollege(${c.s_no})">
+                            <i class="fa-solid fa-pen"></i> Edit
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('drawerSubtitle').innerText = `Displaying ${shownCount} of 84 Colleges • *Asterisk indicates net vacancy awaiting intern occupancy report`;
+        }
+
+        function toggleDrawer() {
+            const drawer = document.getElementById('mainDrawer');
+            drawer.classList.toggle('open');
+            if (drawer.classList.contains('open')) renderTable();
+        }
+
+        function flyToCollege(sno) {
+            const c = collegesData.find(x => x.s_no === sno);
+            if (!c) return;
+            toggleDrawer();
+            map.flyTo([c.lat, c.lng], 15, { duration: 1.5 });
+            setTimeout(() => {
+                markersGroup.eachLayer(layer => {
+                    const ll = layer.getLatLng();
+                    if (Math.abs(ll.lat - c.lat) < 0.001 && Math.abs(ll.lng - c.lng) < 0.001) {
+                        layer.openPopup();
+                    }
+                });
+            }, 1600);
+        }
+
+        // REVIEWS & MODAL HANDLERS
+        const routeEndSelect = document.getElementById('routeEnd');
+        const modalCollegeSelect = document.getElementById('modalCollegeSelect');
+        collegesData.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = `${c.lat},${c.lng}`;
+            opt.innerText = `[Gross: ${c.seats}] ${c.name} (${c.city})`;
+            routeEndSelect.appendChild(opt);
+
+            const opt2 = document.createElement('option');
+            opt2.value = c.s_no;
+            opt2.innerText = `#${c.s_no} - ${c.name} (${c.city})`;
+            modalCollegeSelect.appendChild(opt2);
+        });
+
+        function syncModalCollegeDetails() {
+            const sno = parseInt(document.getElementById('modalCollegeSelect').value);
+            const rev = getLocalReviews()[sno];
+            if (rev) {
+                document.getElementById('modalCurrentInterns').value = rev.currentInterns !== undefined ? rev.currentInterns : '';
+                document.getElementById('modalStipend').value = rev.stipend || '';
+                document.getElementById('modalBiometrics').value = rev.biometrics || 'Not Specified';
+                document.getElementById('modalWorkload').value = rev.workload || 'Not Specified';
+                document.getElementById('modalHostel').value = rev.hostel || 'Not Specified';
+                document.getElementById('modalHiddenFees').value = rev.hiddenFees || '';
+                document.getElementById('modalLivingCost').value = rev.livingCost || '';
+                document.getElementById('modalNotes').value = rev.notes || '';
+                document.getElementById('modalAuthor').value = rev.author || '';
+            } else {
+                document.getElementById('modalCurrentInterns').value = '';
+                document.getElementById('modalStipend').value = '';
+                document.getElementById('modalHiddenFees').value = '';
+                document.getElementById('modalLivingCost').value = '';
+                document.getElementById('modalNotes').value = '';
+            }
+            calcModalNetVacancy();
+        }
+
+        function calcModalNetVacancy() {
+            const sno = parseInt(document.getElementById('modalCollegeSelect').value);
+            const c = collegesData.find(x => x.s_no === sno);
+            if (!c) return;
+
+            const inputVal = document.getElementById('modalCurrentInterns').value.trim();
+            if (inputVal === '') {
+                document.getElementById('modalNetVacancyDisplay').value = `${c.seats} Seats (Full Quota)`;
+            } else {
+                const occ = parseInt(inputVal) || 0;
+                const net = Math.max(0, c.seats - occ);
+                document.getElementById('modalNetVacancyDisplay').value = `${net} Seats Left (${c.seats} - ${occ})`;
+            }
+        }
+
+        function openReviewModal() {
+            syncModalCollegeDetails();
+            document.getElementById('reviewModal').classList.add('active');
+        }
+
+        function openReviewModalForCollege(sno) {
+            document.getElementById('modalCollegeSelect').value = sno;
+            syncModalCollegeDetails();
+            openReviewModal();
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.remove('active');
+        }
+
+        function saveGroundReview() {
+            const sno = document.getElementById('modalCollegeSelect').value;
+            const currentInterns = document.getElementById('modalCurrentInterns').value.trim();
+            const stipend = document.getElementById('modalStipend').value.trim();
+            const biometrics = document.getElementById('modalBiometrics').value;
+            const workload = document.getElementById('modalWorkload').value;
+            const hostel = document.getElementById('modalHostel').value;
+            const hiddenFees = document.getElementById('modalHiddenFees').value.trim();
+            const livingCost = document.getElementById('modalLivingCost').value.trim();
+            const notes = document.getElementById('modalNotes').value.trim();
+            const author = document.getElementById('modalAuthor').value.trim();
+
+            const reviews = getLocalReviews();
+            reviews[sno] = {
+                currentInterns: currentInterns,
+                stipend: stipend || 'Not Reported',
+                biometrics: biometrics,
+                workload: workload,
+                hostel: hostel,
+                hiddenFees: hiddenFees || 'None / ₹0',
+                livingCost: livingCost || 'Not Reported',
+                notes: notes,
+                author: author || 'Anonymous Senior',
+                timestamp: new Date().toISOString()
+            };
+
+            saveLocalReviews(reviews);
+            closeReviewModal();
+            renderMarkers();
+            if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
+            renderPreferencesList();
+            alert("Ground reality info saved! Net vacancy recalculated across map and tables.");
+        }
+
+        function exportCrowdsourcedData() {
+            const data = getLocalReviews();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Maharashtra_CRMI_Ground_Reviews_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+        }
+
+        function triggerImport() {
+            document.getElementById('importFileInput').click();
+        }
+
+        function importCrowdsourcedData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    const current = getLocalReviews();
+                    const merged = Object.assign({}, current, imported);
+                    saveLocalReviews(merged);
+                    renderMarkers();
+                    if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
+                    alert(`Successfully imported and merged ${Object.keys(imported).length} college ground reviews!`);
+                } catch(err) {
+                    alert("Invalid JSON file format.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportTableToCSV() {
+            const reviews = getLocalReviews();
+            let csv = "NMC_SNo,College_Name,Gross_Quota,Current_FMGs,Net_Vacancy,City,District,Division,Stipend,Biometrics,Hidden_Fees,Living_Cost,Notes\n";
+            collegesData.forEach(c => {
+                const rev = reviews[c.s_no] || {};
+                const occ = rev.currentInterns !== undefined ? rev.currentInterns : '';
+                const net = occ !== '' ? Math.max(0, c.seats - parseInt(occ)) : c.seats;
+                csv += `"${c.s_no}","${c.name.replace(/"/g, '""')}","${c.seats}","${occ}","${net}","${c.city}","${c.district}","${c.division}","${(rev.stipend || '').replace(/"/g, '""')}","${(rev.biometrics || '').replace(/"/g, '""')}","${(rev.hiddenFees || '').replace(/"/g, '""')}","${(rev.livingCost || '').replace(/"/g, '""')}","${(rev.notes || '').replace(/"/g, '""')}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Maharashtra_CRMI_Colleges_Net_Vacancies_2026_27.csv`;
+            a.click();
+        }
+
+        // DISTANCE MEASURE RULER
+        let isRulerActive = false;
+        let rulerPoints = [];
+        let rulerLine = null;
+        let rulerMarkers = [];
+
+        function toggleRuler() {
+            isRulerActive = !isRulerActive;
+            document.getElementById('rulerBtn').classList.toggle('active', isRulerActive);
+            document.getElementById('measureBanner').classList.toggle('active', isRulerActive);
+
+            if (isRulerActive) {
+                map.getContainer().style.cursor = 'crosshair';
+                map.on('click', onRulerClick);
+            } else {
+                map.getContainer().style.cursor = '';
+                map.off('click', onRulerClick);
+            }
+        }
+
+        function onRulerClick(e) {
+            rulerPoints.push(e.latlng);
+            const m = L.circleMarker(e.latlng, { radius: 5, color: '#38bdf8', fillColor: '#fff', fillOpacity: 1 }).addTo(map);
+            rulerMarkers.push(m);
+
+            if (rulerPoints.length > 1) {
+                if (rulerLine) map.removeLayer(rulerLine);
+                rulerLine = L.polyline(rulerPoints, { color: '#38bdf8', weight: 3, dashArray: '6, 8' }).addTo(map);
+
+                let totalDistMeters = 0;
+                for (let i = 0; i < rulerPoints.length - 1; i++) {
+                    totalDistMeters += rulerPoints[i].distanceTo(rulerPoints[i+1]);
+                }
+                const distKm = (totalDistMeters / 1000).toFixed(2);
+                document.getElementById('measureDistText').innerText = `${distKm} km (${(distKm * 0.621371).toFixed(2)} miles)`;
+            }
+        }
+
+        function clearRuler() {
+            rulerPoints = [];
+            rulerMarkers.forEach(m => map.removeLayer(m));
+            rulerMarkers = [];
+            if (rulerLine) map.removeLayer(rulerLine);
+            rulerLine = null;
+            document.getElementById('measureDistText').innerText = '0.00 km';
+        }
+
+        // DIRECTIONS & ROUTING (OSRM)
+        let routeLayer = null;
+
+        function toggleDirectionsBox() {
+            const box = document.getElementById('directionsBox');
+            box.classList.toggle('active');
+            document.getElementById('directionsToggleBtn').classList.toggle('active', box.classList.contains('active'));
+        }
+
+        function setDirectionsDestination(lat, lng, name) {
+            toggleDirectionsBox();
+            routeEndSelect.value = `${lat},${lng}`;
+            executeDrivingRoute();
+        }
+
+        function useCurrentLocationAsStart() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    document.getElementById('routeStart').value = `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)} (Your Location)`;
+                    document.getElementById('routeStart').dataset.lat = pos.coords.latitude;
+                    document.getElementById('routeStart').dataset.lng = pos.coords.longitude;
+                    executeDrivingRoute();
+                }, err => {
+                    alert("Could not detect GPS location. Defaulting start to Mumbai.");
+                    document.getElementById('routeStart').value = "18.9632, 72.8338 (Grant JJ Hospital)";
+                    document.getElementById('routeStart').dataset.lat = 18.9632;
+                    document.getElementById('routeStart').dataset.lng = 72.8338;
+                });
+            }
+        }
+
+        async function executeDrivingRoute() {
+            const startInput = document.getElementById('routeStart');
+            let startLat = parseFloat(startInput.dataset.lat || 18.9632);
+            let startLng = parseFloat(startInput.dataset.lng || 72.8338);
+
+            const endVal = routeEndSelect.value;
+            if (!endVal) {
+                alert("Please select a destination college.");
+                return;
+            }
+            const [endLat, endLng] = endVal.split(',').map(parseFloat);
+
+            try {
+                const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.routes && data.routes.length > 0) {
+                    const route = data.routes[0];
+                    const coords = route.geometry.coordinates.map(pt => [pt[1], pt[0]]);
+
+                    if (routeLayer) map.removeLayer(routeLayer);
+                    routeLayer = L.polyline(coords, {
+                        color: '#10b981',
+                        weight: 5,
+                        opacity: 0.9,
+                        dashArray: '2, 6'
+                    }).addTo(map);
+
+                    map.fitBounds(routeLayer.getBounds(), { padding: [60, 60] });
+
+                    const distKm = (route.distance / 1000).toFixed(1);
+                    const hours = Math.floor(route.duration / 3600);
+                    const mins = Math.round((route.duration % 3600) / 60);
+
+                    document.getElementById('routeKm').innerText = `${distKm} km`;
+                    document.getElementById('routeDuration').innerText = `${hours}h ${mins}m drive`;
+                    document.getElementById('routeResults').style.display = 'block';
+                }
+            } catch(e) {
+                alert("Driving route calculation failed. Connecting with straight line distance.");
+                if (routeLayer) map.removeLayer(routeLayer);
+                routeLayer = L.polyline([[startLat, startLng], [endLat, endLng]], { color: '#f59e0b', weight: 4 }).addTo(map);
+                map.fitBounds(routeLayer.getBounds(), { padding: [60, 60] });
+            }
+        }
+
+        // Initial render
+        updatePreferenceBadge();
+        renderMarkers();
+    </script>
+</body>
+</html>
