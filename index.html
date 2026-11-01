@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Maharashtra CRMI 2026–2027 | Live Net Vacancy & Satellite Portal</title>
     
     <!-- Leaflet CSS -->
@@ -58,18 +58,25 @@
             background: #020617;
         }
 
-        /* Floating Top Bar */
-        .top-nav {
+        /* Floating Master Top Header (Wraps Nav & Filter Bar to prevent mobile overlap) */
+        .top-floating-header {
             position: absolute;
             top: 16px;
             left: 16px;
             right: 16px;
             z-index: 1000;
             display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .top-nav {
+            display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            pointer-events: none;
+            width: 100%;
         }
 
         .top-left, .top-right {
@@ -341,18 +348,22 @@
             border-color: rgba(255, 255, 255, 0.25);
         }
 
-        /* Filter Bar */
+        /* Filter Bar (Flows naturally below nav without colliding) */
         .filter-bar {
-            position: absolute;
-            top: 78px;
-            left: 16px;
-            z-index: 1000;
             display: flex;
             align-items: center;
             gap: 8px;
             overflow-x: auto;
-            max-width: calc(100vw - 32px);
+            width: 100%;
+            max-width: 100%;
             padding-bottom: 4px;
+            pointer-events: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .filter-bar::-webkit-scrollbar {
+            display: none;
         }
 
         .filter-pill {
@@ -1073,10 +1084,310 @@
             color: #38bdf8;
         }
 
+        /* Mobile Bottom App Navigation Dock */
+        .mobile-bottom-dock {
+            display: none;
+        }
+
         @media (max-width: 768px) {
-            .search-container { min-width: 140px; }
-            .brand-title p { display: none; }
-            .pref-drawer { width: 100vw; }
+            /* Master Header Stacking & No Collision */
+            .top-floating-header {
+                top: max(8px, env(safe-area-inset-top));
+                left: 8px;
+                right: 8px;
+                gap: 6px;
+            }
+
+            .top-nav {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+
+            .top-left {
+                flex-direction: column;
+                gap: 6px;
+                width: 100%;
+            }
+
+            .brand-badge {
+                padding: 6px 12px;
+                border-radius: var(--radius-md);
+                width: 100%;
+                box-sizing: border-box;
+                justify-content: space-between;
+            }
+
+            .brand-logo {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+                border-radius: 6px;
+            }
+
+            .brand-title h1 {
+                font-size: 13px;
+            }
+
+            .brand-title p {
+                display: none;
+            }
+
+            /* Search takes full width on mobile */
+            .search-wrapper {
+                width: 100%;
+            }
+
+            .search-container {
+                min-width: 0 !important;
+                width: 100% !important;
+                box-sizing: border-box;
+                padding: 7px 12px;
+                border-radius: var(--radius-md);
+            }
+
+            .search-dropdown {
+                width: 100% !important;
+                max-height: 50vh !important;
+                border-radius: var(--radius-md);
+            }
+
+            /* Hide top-right buttons on mobile (they are now in the bottom dock) */
+            .top-right {
+                display: none !important;
+            }
+
+            .filter-bar {
+                padding: 2px 0 4px 0;
+            }
+
+            .filter-pill, .district-select-pill {
+                padding: 5px 10px;
+                font-size: 11px;
+                flex-shrink: 0;
+            }
+
+            /* Mobile Bottom App Dock */
+            .mobile-bottom-dock {
+                display: flex !important;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 2100;
+                background: rgba(15, 23, 42, 0.96);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-top: 1px solid var(--border-glass);
+                padding: 6px 10px max(8px, env(safe-area-inset-bottom)) 10px;
+                justify-content: space-around;
+                align-items: center;
+                box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.85);
+            }
+
+            .dock-btn {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2px;
+                background: transparent;
+                border: none;
+                color: var(--text-muted);
+                font-size: 10px;
+                font-weight: 600;
+                cursor: pointer;
+                padding: 6px 10px;
+                border-radius: 10px;
+                position: relative;
+                text-decoration: none;
+                transition: all 0.15s ease;
+            }
+
+            .dock-btn i {
+                font-size: 17px;
+            }
+
+            .dock-btn.active, .dock-btn:hover {
+                color: #fff;
+                background: rgba(56, 189, 248, 0.15);
+            }
+
+            .dock-btn.active i {
+                color: var(--primary);
+            }
+
+            .dock-btn-badge {
+                position: absolute;
+                top: 2px;
+                right: 10px;
+                background: #f59e0b;
+                color: #000;
+                font-size: 9px;
+                font-weight: 800;
+                padding: 1px 5px;
+                border-radius: 10px;
+                line-height: 1.2;
+            }
+
+            /* Tool Panel placed above bottom dock */
+            .tool-panel {
+                bottom: calc(75px + env(safe-area-inset-bottom)) !important;
+                right: 12px !important;
+            }
+
+            /* Shortlist Drawer (My Choices) Mobile Overhaul */
+            .pref-drawer {
+                width: 100vw !important;
+                max-width: 100vw !important;
+                height: 100dvh !important;
+                max-height: 100dvh !important;
+                top: 0 !important;
+                right: 0 !important;
+                left: 0 !important;
+                bottom: 0 !important;
+                z-index: 2500 !important;
+                border-left: none !important;
+                border-radius: 0 !important;
+                padding-top: max(8px, env(safe-area-inset-top));
+                padding-bottom: max(12px, env(safe-area-inset-bottom));
+                box-sizing: border-box;
+            }
+
+            .pref-header {
+                padding: 12px 14px !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+            }
+
+            .pref-header-top {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+            }
+
+            .pref-header-actions {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .pref-header-actions .btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .pref-body {
+                padding: 10px 12px 110px 12px !important;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .pref-item-card {
+                padding: 10px 12px !important;
+                border-radius: var(--radius-md) !important;
+            }
+
+            .pref-rank-badge {
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 13px !important;
+                border-radius: 8px !important;
+            }
+
+            .reorder-btn {
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 14px !important;
+                border-radius: 8px !important;
+            }
+
+            .pref-rank-slider {
+                height: 8px !important;
+                touch-action: pan-x !important;
+            }
+
+            .pref-rank-slider::-webkit-slider-thumb {
+                width: 22px !important;
+                height: 22px !important;
+            }
+
+            .pref-rank-slider::-moz-range-thumb {
+                width: 22px !important;
+                height: 22px !important;
+            }
+
+            /* Table Drawer Mobile */
+            .drawer {
+                height: 100dvh !important;
+                max-height: 100dvh !important;
+                top: 0 !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 2500 !important;
+                border-radius: 0 !important;
+                border-top: none !important;
+                padding-top: max(8px, env(safe-area-inset-top));
+                padding-bottom: max(12px, env(safe-area-inset-bottom));
+                box-sizing: border-box;
+            }
+
+            .drawer-header {
+                padding: 12px 14px !important;
+            }
+
+            .drawer-header h2 {
+                font-size: 14px !important;
+            }
+
+            .drawer-body {
+                padding: 10px 12px 110px 12px !important;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Review Modal Bottom Sheet */
+            .modal-overlay {
+                padding: 0 !important;
+                align-items: flex-end !important;
+            }
+
+            .modal-card {
+                width: 100% !important;
+                max-width: 100% !important;
+                max-height: 90dvh !important;
+                border-radius: 20px 20px 0 0 !important;
+                padding: 18px 16px max(16px, env(safe-area-inset-bottom)) 16px !important;
+                box-sizing: border-box;
+            }
+
+            .modal-grid {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+
+            /* Popups */
+            .leaflet-popup-content-wrapper {
+                max-width: calc(100vw - 32px) !important;
+                width: 320px !important;
+            }
+
+            .popup-actions {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 6px !important;
+            }
+
+            .popup-actions .btn {
+                width: 100% !important;
+                box-sizing: border-box !important;
+                justify-content: center !important;
+                padding: 6px 8px !important;
+                font-size: 11px !important;
+            }
         }
     </style>
 </head>
@@ -1085,63 +1396,67 @@
     <!-- MAP CONTAINER -->
     <div id="map"></div>
 
-    <!-- TOP FLOATING BAR -->
-    <div class="top-nav">
-        <div class="top-left">
-            <div class="brand-badge">
-                <div class="brand-logo"><i class="fa-solid fa-earth-asia"></i></div>
-                <div class="brand-title">
-                    <h1>Maharashtra CRMI 2026–27</h1>
-                    <p>84 COLLEGES • LIVE NET VACANCY & PREFERENCE BUILDER</p>
+    <!-- TOP MASTER FLOATING HEADER (Nav & Filters wrapped cleanly to eliminate mobile overlap) -->
+    <div class="top-floating-header">
+        <div class="top-nav">
+            <div class="top-left">
+                <div class="brand-badge">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="brand-logo"><i class="fa-solid fa-earth-asia"></i></div>
+                        <div class="brand-title">
+                            <h1>Maharashtra CRMI 2026–27</h1>
+                            <p>84 COLLEGES • LIVE NET VACANCY & PREFERENCE BUILDER</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEARCH AUTOCOMPLETE -->
+                <div class="search-wrapper">
+                    <div class="search-container">
+                        <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 13px;"></i>
+                        <input type="text" id="searchInput" placeholder="Search District (Dhule, Nashik...) or College..." autocomplete="off" oninput="handleSearchInput(this.value)" onkeydown="handleSearchKey(event)" />
+                        <button id="clearSearchBtn" class="clear-search-btn" onclick="clearSearch()" title="Clear search">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <span id="matchCount" class="match-count-badge">84 Colleges</span>
+                    </div>
+                    <div id="searchDropdown" class="search-dropdown"></div>
                 </div>
             </div>
 
-            <!-- SEARCH AUTOCOMPLETE -->
-            <div class="search-wrapper">
-                <div class="search-container">
-                    <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 13px;"></i>
-                    <input type="text" id="searchInput" placeholder="Search District (Dhule, Nashik...) or College..." autocomplete="off" oninput="handleSearchInput(this.value)" onkeydown="handleSearchKey(event)" />
-                    <button id="clearSearchBtn" class="clear-search-btn" onclick="clearSearch()" title="Clear search">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                    <span id="matchCount" class="match-count-badge">84 Colleges</span>
-                </div>
-                <div id="searchDropdown" class="search-dropdown"></div>
+            <div class="top-right">
+                <!-- PREFERENCE LIST BUTTON -->
+                <button class="btn btn-warning" onclick="togglePrefDrawer()">
+                    <i class="fa-solid fa-star"></i> My Choices (<span id="prefBadgeCount">0</span>)
+                </button>
+                <button class="btn btn-primary" onclick="toggleDrawer()">
+                    <i class="fa-solid fa-table-list"></i> Full Table
+                </button>
+                <button class="btn btn-accent" onclick="openReviewModal()">
+                    <i class="fa-solid fa-plus-circle"></i> Add Ground Info
+                </button>
+                <a href="https://forms.gle/BDd7dDk3Lwz5ju5FA" target="_blank" class="btn">
+                    <i class="fa-solid fa-clipboard-check" style="color: #60a5fa;"></i> Google Form
+                </a>
             </div>
         </div>
 
-        <div class="top-right">
-            <!-- PREFERENCE LIST BUTTON -->
-            <button class="btn btn-warning" onclick="togglePrefDrawer()">
-                <i class="fa-solid fa-star"></i> My Choices (<span id="prefBadgeCount">0</span>)
-            </button>
-            <button class="btn btn-primary" onclick="toggleDrawer()">
-                <i class="fa-solid fa-table-list"></i> Full Table
-            </button>
-            <button class="btn btn-accent" onclick="openReviewModal()">
-                <i class="fa-solid fa-plus-circle"></i> Add Ground Info
-            </button>
-            <a href="https://forms.gle/BDd7dDk3Lwz5ju5FA" target="_blank" class="btn">
-                <i class="fa-solid fa-clipboard-check" style="color: #60a5fa;"></i> Google Form
-            </a>
+        <!-- FILTER PILLS ROW -->
+        <div class="filter-bar">
+            <div class="filter-pill active" id="pillAll" onclick="setDivisionFilter('All', this)">All Maharashtra (84)</div>
+            
+            <select class="district-select-pill" id="districtSelect" onchange="onDistrictDropdownSelect(this.value)">
+                <option value="">📍 Jump to District...</option>
+            </select>
+
+            <div class="filter-pill" onclick="setDivisionFilter('Konkan', this)">Mumbai & Konkan (17)</div>
+            <div class="filter-pill" onclick="setDivisionFilter('Pune', this)">Pune Division (18)</div>
+            <div class="filter-pill" onclick="setDivisionFilter('Nashik', this)">Nashik Division (11)</div>
+            <div class="filter-pill" onclick="setDivisionFilter('Marathwada', this)">Marathwada (14)</div>
+            <div class="filter-pill" onclick="setDivisionFilter('Vidarbha', this)">Vidarbha (24)</div>
+            <div class="filter-pill" onclick="setTypeFilter('Government', this)">Govt & Corp Only</div>
+            <div class="filter-pill" onclick="setHighSeatsFilter(this)">High Quota (≥50)</div>
         </div>
-    </div>
-
-    <!-- FILTER PILLS ROW -->
-    <div class="filter-bar">
-        <div class="filter-pill active" id="pillAll" onclick="setDivisionFilter('All', this)">All Maharashtra (84)</div>
-        
-        <select class="district-select-pill" id="districtSelect" onchange="onDistrictDropdownSelect(this.value)">
-            <option value="">📍 Jump to District...</option>
-        </select>
-
-        <div class="filter-pill" onclick="setDivisionFilter('Konkan', this)">Mumbai & Konkan (17)</div>
-        <div class="filter-pill" onclick="setDivisionFilter('Pune', this)">Pune Division (18)</div>
-        <div class="filter-pill" onclick="setDivisionFilter('Nashik', this)">Nashik Division (11)</div>
-        <div class="filter-pill" onclick="setDivisionFilter('Marathwada', this)">Marathwada (14)</div>
-        <div class="filter-pill" onclick="setDivisionFilter('Vidarbha', this)">Vidarbha (24)</div>
-        <div class="filter-pill" onclick="setTypeFilter('Government', this)">Govt & Corp Only</div>
-        <div class="filter-pill" onclick="setHighSeatsFilter(this)">High Quota (≥50)</div>
     </div>
 
     <!-- RIGHT SIDE TOOL PANEL -->
@@ -1233,19 +1548,26 @@
     <!-- PREFERENCE LIST DRAWER (Idea 4) -->
     <div class="pref-drawer" id="prefDrawer">
         <div class="pref-header">
-            <div>
-                <h3 style="font-size: 16px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-star" style="color: #f59e0b;"></i> My Counseling Choices
-                </h3>
-                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;" id="prefSummarySubtitle">
-                    0 Colleges Shortlisted
+            <div class="pref-header-top">
+                <div>
+                    <h3 style="font-size: 16px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-star" style="color: #f59e0b;"></i> My Counseling Choices
+                    </h3>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;" id="prefSummarySubtitle">
+                        0 Colleges Shortlisted
+                    </div>
                 </div>
+                <button class="btn btn-sm btn-close-pref" onclick="togglePrefDrawer()" style="padding: 6px 12px; font-size: 12px; display: flex; align-items: center; gap: 5px;">
+                    <i class="fa-solid fa-xmark"></i> Close
+                </button>
             </div>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn btn-sm btn-primary" onclick="exportPreferencesList()" title="Export Choice Order">
+            <div class="pref-header-actions">
+                <button class="btn btn-sm btn-primary" onclick="exportPreferencesList()" title="Export Choice Order" style="flex: 1; justify-content: center;">
                     <i class="fa-solid fa-file-export"></i> Export Choices
                 </button>
-                <button class="btn btn-sm" onclick="togglePrefDrawer()"><i class="fa-solid fa-xmark"></i></button>
+                <button class="btn btn-sm" onclick="clearAllPreferences()" title="Clear List" style="color: #f87171;">
+                    <i class="fa-solid fa-trash-can"></i> Clear All
+                </button>
             </div>
         </div>
         <div class="pref-body" id="prefBody">
@@ -1432,7 +1754,33 @@
 
         function updatePreferenceBadge() {
             const list = getPreferences();
-            document.getElementById('prefBadgeCount').innerText = list.length;
+            const badge1 = document.getElementById('prefBadgeCount');
+            if (badge1) badge1.innerText = list.length;
+            const badge2 = document.getElementById('dockPrefBadge');
+            if (badge2) badge2.innerText = list.length;
+        }
+
+        function setDockActive(el) {
+            document.querySelectorAll('.dock-btn').forEach(btn => btn.classList.remove('active'));
+            if (el) el.classList.add('active');
+        }
+
+        function closeAllDrawers() {
+            const prefDrawer = document.getElementById('prefDrawer');
+            if (prefDrawer) prefDrawer.classList.remove('open');
+            const mainDrawer = document.getElementById('mainDrawer');
+            if (mainDrawer) mainDrawer.classList.remove('open');
+            closeReviewModal();
+            setDockActive(document.getElementById('dockBtnMap'));
+        }
+
+        function clearAllPreferences() {
+            if (confirm("Are you sure you want to clear your shortlisted choices?")) {
+                savePreferences([]);
+                renderMarkers();
+                if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
+                renderPreferencesList();
+            }
         }
 
         // Populate District Filter Dropdown
@@ -1986,9 +2334,16 @@
 
         function togglePrefDrawer() {
             const drawer = document.getElementById('prefDrawer');
+            const mainDrawer = document.getElementById('mainDrawer');
+            if (mainDrawer && mainDrawer.classList.contains('open')) {
+                mainDrawer.classList.remove('open');
+            }
             drawer.classList.toggle('open');
             if (drawer.classList.contains('open')) {
                 renderPreferencesList();
+                setDockActive(document.getElementById('dockBtnShortlist'));
+            } else {
+                setDockActive(document.getElementById('dockBtnMap'));
             }
         }
 
@@ -2175,8 +2530,17 @@
 
         function toggleDrawer() {
             const drawer = document.getElementById('mainDrawer');
+            const prefDrawer = document.getElementById('prefDrawer');
+            if (prefDrawer && prefDrawer.classList.contains('open')) {
+                prefDrawer.classList.remove('open');
+            }
             drawer.classList.toggle('open');
-            if (drawer.classList.contains('open')) renderTable();
+            if (drawer.classList.contains('open')) {
+                renderTable();
+                setDockActive(document.getElementById('dockBtnTable'));
+            } else {
+                setDockActive(document.getElementById('dockBtnMap'));
+            }
         }
 
         function flyToCollege(sno) {
@@ -2248,8 +2612,13 @@
         }
 
         function openReviewModal() {
+            const prefDrawer = document.getElementById('prefDrawer');
+            if (prefDrawer) prefDrawer.classList.remove('open');
+            const mainDrawer = document.getElementById('mainDrawer');
+            if (mainDrawer) mainDrawer.classList.remove('open');
             syncModalCollegeDetails();
             document.getElementById('reviewModal').classList.add('active');
+            setDockActive(document.getElementById('dockBtnAdd'));
         }
 
         function openReviewModalForCollege(sno) {
@@ -2260,6 +2629,7 @@
 
         function closeReviewModal() {
             document.getElementById('reviewModal').classList.remove('active');
+            setDockActive(document.getElementById('dockBtnMap'));
         }
 
         function saveGroundReview() {
@@ -2476,5 +2846,30 @@
         updatePreferenceBadge();
         renderMarkers();
     </script>
+
+    <!-- MOBILE BOTTOM APP NAVIGATION DOCK (Thumb-accessible native app navigation) -->
+    <div class="mobile-bottom-dock">
+        <button class="dock-btn active" id="dockBtnMap" onclick="closeAllDrawers(); setDockActive(this);">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <span>Map</span>
+        </button>
+        <button class="dock-btn" id="dockBtnShortlist" onclick="togglePrefDrawer(); setDockActive(this);">
+            <i class="fa-solid fa-star" style="color: #f59e0b;"></i>
+            <span>Choices</span>
+            <span class="dock-btn-badge" id="dockPrefBadge">0</span>
+        </button>
+        <button class="dock-btn" id="dockBtnTable" onclick="toggleDrawer(); setDockActive(this);">
+            <i class="fa-solid fa-table-list" style="color: #38bdf8;"></i>
+            <span>Colleges</span>
+        </button>
+        <button class="dock-btn" id="dockBtnAdd" onclick="openReviewModal(); setDockActive(this);">
+            <i class="fa-solid fa-plus-circle" style="color: #10b981;"></i>
+            <span>Add Info</span>
+        </button>
+        <a href="https://forms.gle/BDd7dDk3Lwz5ju5FA" target="_blank" class="dock-btn" style="text-decoration: none;">
+            <i class="fa-solid fa-clipboard-check" style="color: #818cf8;"></i>
+            <span>Form</span>
+        </a>
+    </div>
 </body>
 </html>
