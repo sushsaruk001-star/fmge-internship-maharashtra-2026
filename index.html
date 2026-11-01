@@ -7,6 +7,10 @@
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- jsPDF & AutoTable for Instant PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1731,11 +1735,14 @@
                 </button>
             </div>
             <div class="pref-header-actions">
-                <button class="btn btn-sm btn-primary" onclick="exportPreferencesList()" title="Export Choice Order" style="flex: 1; justify-content: center;">
-                    <i class="fa-solid fa-file-export"></i> Export Choices
+                <button class="btn btn-sm btn-primary" onclick="exportPreferencesToPDF()" title="Export PDF for Choice Filling" style="flex: 1.2; justify-content: center; background: #0284c7;">
+                    <i class="fa-solid fa-file-pdf" style="color: #fca5a5;"></i> Export PDF
                 </button>
-                <button class="btn btn-sm" onclick="clearAllPreferences()" title="Clear List" style="color: #f87171;">
-                    <i class="fa-solid fa-trash-can"></i> Clear All
+                <button class="btn btn-sm" onclick="exportPreferencesList()" title="Export Text Choice Order" style="flex: 0.8; justify-content: center;">
+                    <i class="fa-solid fa-file-lines"></i> TXT
+                </button>
+                <button class="btn btn-sm" onclick="clearAllPreferences()" title="Clear List" style="color: #f87171; padding: 7px 10px;">
+                    <i class="fa-solid fa-trash-can"></i>
                 </button>
             </div>
         </div>
@@ -1756,7 +1763,8 @@
                     84 Approved Colleges • Gross Capacity vs. Live Net Vacancies
                 </div>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <button class="btn btn-sm btn-primary" onclick="exportTableToPDF()"><i class="fa-solid fa-file-pdf" style="color: #fca5a5;"></i> Export PDF</button>
                 <button class="btn btn-sm" onclick="exportTableToCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
                 <button class="btn btn-sm" onclick="toggleDrawer()"><i class="fa-solid fa-xmark"></i> Close</button>
             </div>
@@ -1899,11 +1907,14 @@
         // ========================================================
         // REAL-TIME CLOUD DATABASE ENGINE (Firebase RTDB / Multi-Response)
         // ========================================================
-        let FIREBASE_DB_URL = "https://fmge-maharashtra-internship-default-rtdb.asia-southeast1.firebasedatabase.app";
-
+        const OFFICIAL_FIREBASE_URL = "https://fmge-maharashtra-internship-default-rtdb.asia-southeast1.firebasedatabase.app";
+        let FIREBASE_DB_URL = OFFICIAL_FIREBASE_URL;
         const savedCloudUrl = localStorage.getItem("MH_CRMI_CLOUD_DB_URL");
-        if (savedCloudUrl) {
+        if (savedCloudUrl && savedCloudUrl.includes("fmge-maharashtra-internship")) {
             FIREBASE_DB_URL = savedCloudUrl;
+        } else {
+            FIREBASE_DB_URL = OFFICIAL_FIREBASE_URL;
+            localStorage.removeItem("MH_CRMI_CLOUD_DB_URL");
         }
 
         function escapeHtml(str) {
@@ -1934,16 +1945,14 @@
             const all = getLocalReviews();
             const raw = all[sno];
             if (!raw) return [];
-            // If it's an array of review objects
+
+            // 1. If it's an array of review objects
             if (Array.isArray(raw)) {
                 return raw.filter(r => r && typeof r === 'object' && (r.currentInterns !== undefined || r.stipend !== undefined))
                           .sort((a,b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
             }
-            // If it's a legacy single-object format (has primitive currentInterns or stipend)
-            if (raw.currentInterns !== undefined && typeof raw.currentInterns !== 'object') {
-                return [raw];
-            }
-            // If it is an object map of push IDs
+
+            // 2. If it's an object map containing push keys or sub-reviews
             if (typeof raw === 'object') {
                 const list = [];
                 for (const key in raw) {
@@ -1952,7 +1961,14 @@
                         list.push(item);
                     }
                 }
-                return list.sort((a,b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+                if (list.length > 0) {
+                    return list.sort((a,b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+                }
+
+                // 3. Fallback only if no child objects exist: legacy single-object
+                if (raw.currentInterns !== undefined || raw.stipend !== undefined) {
+                    return [raw];
+                }
             }
             return [];
         }
@@ -1993,17 +2009,14 @@
             try {
                 updateCloudSyncStatus("syncing", "Syncing Cloud...");
                 const cleanUrl = FIREBASE_DB_URL.replace(/\/+$/, "");
-                const res = await fetch(`${cleanUrl}/reviews.json`);
+                const res = await fetch(`${cleanUrl}/reviews.json?t=${Date.now()}`);
                 if (res.ok) {
                     const cloudData = await res.json();
                     if (cloudData && typeof cloudData === 'object') {
                         const local = getLocalReviews();
+                        // Cloud data is Single Source of Truth: overwrite colleges with clean cloud push map
                         for (const sno in cloudData) {
-                            if (!local[sno] || typeof local[sno] !== 'object') {
-                                local[sno] = cloudData[sno];
-                            } else if (typeof cloudData[sno] === 'object') {
-                                local[sno] = Object.assign({}, local[sno], cloudData[sno]);
-                            }
+                            local[sno] = cloudData[sno];
                         }
                         saveLocalReviews(local);
                         renderMarkers();
@@ -2886,6 +2899,220 @@
             savePreferences(prefList);
             renderPreferencesList();
         }
+
+                // PDF EXPORT ENGINE VIA jsPDF & AutoTable
+        function exportPreferencesToPDF() {
+            const prefList = getPreferences();
+            if (prefList.length === 0) {
+                alert("Please shortlist at least one college before exporting to PDF!");
+                return;
+            }
+
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                alert("PDF generator is loading. Please check internet connection and try again.");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            // Header Banner
+            doc.setFillColor(15, 23, 42);
+            doc.rect(0, 0, 210, 28, 'F');
+
+            doc.setTextColor(56, 189, 248);
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.text("MAHARASHTRA CRMI 2026-2027 COUNSELING", 14, 11);
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(9.5);
+            doc.setFont("helvetica", "normal");
+            doc.text("My Choice Preferences List & Ground Reality Directory", 14, 17);
+
+            doc.setFontSize(8);
+            doc.setTextColor(148, 163, 184);
+            const dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            doc.text(`Generated: ${dateStr} • Total Choices: ${prefList.length}`, 14, 23);
+
+            const tableRows = [];
+            prefList.forEach((sno, idx) => {
+                const c = collegesData.find(x => x.s_no === sno);
+                if (!c) return;
+
+                const revList = getCollegeReviewsList(sno);
+                const rev = revList.length > 0 ? revList[0] : {};
+                const occ = (rev.currentInterns !== undefined && rev.currentInterns !== '') ? rev.currentInterns : '—';
+                const net = (occ !== '—' && !isNaN(parseInt(occ))) ? Math.max(0, c.seats - parseInt(occ)) : c.seats;
+                
+                const collegeDisplay = `${c.name}\n${c.city}, ${c.district} (${c.division} Div) [S.No #${c.s_no}]`;
+                const vacancyDisplay = `Gross: ${c.seats}\nOccupied: ${occ}\nNet Left: ${net}`;
+                
+                let groundDetails = `Stipend: ${rev.stipend || 'Not Reported'}\nBiometrics: ${rev.biometrics || 'Not Specified'}\nRent: ${rev.livingCost || 'Not Reported'}`;
+                if (rev.hiddenFees && rev.hiddenFees !== 'None / ₹0' && rev.hiddenFees !== 'No' && rev.hiddenFees !== 'None') {
+                    groundDetails += `\nFees: ${rev.hiddenFees}`;
+                }
+                if (rev.notes) {
+                    const shortNotes = rev.notes.length > 90 ? rev.notes.substring(0, 87) + '...' : rev.notes;
+                    groundDetails += `\nTips: "${shortNotes}"`;
+                }
+
+                tableRows.push([
+                    `#${idx + 1}`,
+                    collegeDisplay,
+                    vacancyDisplay,
+                    groundDetails
+                ]);
+            });
+
+            doc.autoTable({
+                startY: 32,
+                head: [['Rank', 'Medical College & Location', 'Seat Vacancy', 'Ground Reality & Costs']],
+                body: tableRows,
+                theme: 'striped',
+                headStyles: {
+                    fillColor: [2, 132, 199],
+                    textColor: 255,
+                    fontSize: 9,
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: 8,
+                    textColor: [30, 41, 59],
+                    cellPadding: 3
+                },
+                columnStyles: {
+                    0: { cellWidth: 14, halign: 'center', fontStyle: 'bold' },
+                    1: { cellWidth: 70 },
+                    2: { cellWidth: 32 },
+                    3: { cellWidth: 'auto' }
+                },
+                alternateRowStyles: {
+                    fillColor: [248, 250, 252]
+                },
+                didDrawPage: function(data) {
+                    doc.setFontSize(8);
+                    doc.setTextColor(148, 163, 184);
+                    doc.text(
+                        `Page ${doc.internal.getNumberOfPages()} • Maharashtra CRMI Live Portal (https://sushsaruk001-star.github.io/fmge-internship-maharashtra-2026/)`,
+                        14,
+                        doc.internal.pageSize.height - 8
+                    );
+                }
+            });
+
+            doc.save(`Maharashtra_CRMI_My_Choice_Preferences_${new Date().toISOString().slice(0,10)}.pdf`);
+        }
+
+        function exportTableToPDF() {
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                alert("PDF generator is loading. Please check internet connection.");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const q = searchQuery.toLowerCase().trim();
+
+            doc.setFillColor(15, 23, 42);
+            doc.rect(0, 0, 297, 24, 'F');
+
+            doc.setTextColor(56, 189, 248);
+            doc.setFontSize(13);
+            doc.setFont("helvetica", "bold");
+            doc.text("MAHARASHTRA CRMI 2026-2027: 84 COLLEGES DIRECTORY", 14, 10);
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
+            const filterInfo = `Filter: ${activeFilter} ${q ? `• Search: "${q}"` : ''}`;
+            const dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+            doc.text(`${filterInfo} • Date: ${dateStr}`, 14, 17);
+
+            const tableRows = [];
+            collegesData.forEach(c => {
+                if (activeFilter === 'Konkan' && c.division !== 'Konkan') return;
+                if (activeFilter === 'Pune' && c.division !== 'Pune') return;
+                if (activeFilter === 'Nashik' && c.division !== 'Nashik') return;
+                if (activeFilter === 'Marathwada' && c.division !== 'Marathwada') return;
+                if (activeFilter === 'Vidarbha' && (c.division !== 'Nagpur' && c.division !== 'Amravati')) return;
+                if (activeFilter === 'Government' && !c.type.toLowerCase().includes('govt') && !c.type.toLowerCase().includes('municipal') && !c.type.toLowerCase().includes('armed')) return;
+                if (activeFilter === 'HighSeats' && c.seats < 50) return;
+
+                if (q) {
+                    const corpus = c.search_corpus || (c.name + ' ' + c.city + ' ' + c.district).toLowerCase();
+                    if (!corpus.includes(q)) return;
+                }
+
+                const revList = getCollegeReviewsList(c.s_no);
+                const rev = revList.length > 0 ? revList[0] : {};
+                const occ = (rev.currentInterns !== undefined && rev.currentInterns !== '') ? rev.currentInterns : '—';
+                const net = (occ !== '—' && !isNaN(parseInt(occ))) ? Math.max(0, c.seats - parseInt(occ)) : `${c.seats}*`;
+
+                tableRows.push([
+                    `#${c.s_no}`,
+                    c.name,
+                    c.city,
+                    c.district,
+                    c.division,
+                    c.seats,
+                    occ,
+                    net,
+                    rev.stipend || '—',
+                    rev.biometrics || '—',
+                    rev.livingCost || '—'
+                ]);
+            });
+
+            doc.autoTable({
+                startY: 28,
+                head: [['NMC#', 'Medical College', 'City', 'District', 'Division', 'Quota', 'FMGs', 'Net', 'Stipend', 'Biometrics', 'Rent/Living']],
+                body: tableRows,
+                theme: 'striped',
+                headStyles: {
+                    fillColor: [2, 132, 199],
+                    textColor: 255,
+                    fontSize: 8,
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: 7.5,
+                    textColor: [30, 41, 59],
+                    cellPadding: 2
+                },
+                columnStyles: {
+                    0: { cellWidth: 14, halign: 'center' },
+                    1: { cellWidth: 65 },
+                    5: { cellWidth: 14, halign: 'center' },
+                    6: { cellWidth: 14, halign: 'center' },
+                    7: { cellWidth: 14, halign: 'center', fontStyle: 'bold' }
+                },
+                alternateRowStyles: {
+                    fillColor: [248, 250, 252]
+                },
+                didDrawPage: function(data) {
+                    doc.setFontSize(7.5);
+                    doc.setTextColor(148, 163, 184);
+                    doc.text(
+                        `Page ${doc.internal.getNumberOfPages()} • Maharashtra CRMI Live Portal • *Asterisk indicates Base NMC Quota pending ground reports`,
+                        14,
+                        doc.internal.pageSize.height - 6
+                    );
+                }
+            });
+
+            doc.save(`Maharashtra_CRMI_Colleges_Directory_${new Date().toISOString().slice(0,10)}.pdf`);
+        }
+
 
         function exportPreferencesList() {
             const prefList = getPreferences();
