@@ -125,6 +125,55 @@
             letter-spacing: 0.5px;
         }
 
+        /* Real-Time Cloud Sync Badge */
+        .cloud-status-badge {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .cloud-status-badge:hover {
+            background: rgba(30, 41, 59, 0.9);
+            transform: translateY(-1px);
+        }
+
+        .cloud-status-badge.online {
+            color: #34d399;
+            border-color: rgba(52, 211, 153, 0.35);
+            background: rgba(16, 185, 129, 0.12);
+        }
+        .cloud-status-badge.online i {
+            color: #34d399;
+        }
+
+        .cloud-status-badge.syncing {
+            color: #38bdf8;
+            border-color: rgba(56, 189, 248, 0.35);
+            background: rgba(14, 165, 233, 0.12);
+        }
+
+        .cloud-status-badge.local {
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.35);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .cloud-status-badge.error {
+            color: #f87171;
+            border-color: rgba(248, 113, 113, 0.35);
+            background: rgba(239, 68, 68, 0.12);
+        }
+
         /* Search Autocomplete */
         .search-wrapper {
             position: relative;
@@ -568,6 +617,122 @@
 
         .popup-body {
             padding: 14px 18px;
+            max-height: 72vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Community Multi-Response Review Stream */
+        .review-stream {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .review-stream::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .review-stream::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .review-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-sm);
+            padding: 10px;
+            transition: all 0.15s ease;
+        }
+
+        .review-card.latest-report {
+            border-left: 3px solid #38bdf8;
+            background: rgba(30, 41, 59, 0.85);
+        }
+
+        .review-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 11px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 5px;
+        }
+
+        .review-author {
+            font-weight: 700;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .review-tag-badge {
+            background: rgba(56, 189, 248, 0.2);
+            color: #38bdf8;
+            font-size: 9px;
+            padding: 1px 6px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .review-tag-badge.badge-sub {
+            background: rgba(148, 163, 184, 0.15);
+            color: #94a3b8;
+        }
+
+        .review-time {
+            font-size: 10px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .review-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 11px;
+        }
+
+        .review-cell {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 5px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .review-cell .lbl {
+            font-size: 9px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .review-cell .val {
+            font-weight: 600;
+            color: #f1f5f9;
+            word-break: break-word;
+        }
+
+        .review-notes-box {
+            margin-top: 8px;
+            padding: 6px 10px;
+            background: rgba(15, 23, 42, 0.85);
+            border-left: 2px solid #f59e0b;
+            border-radius: 0 4px 4px 0;
+            font-size: 11px;
+            color: #e2e8f0;
+            font-style: italic;
+            line-height: 1.4;
         }
 
         /* TRUE NET VACANCY ENGINE CARD */
@@ -1408,6 +1573,10 @@
                             <p>84 COLLEGES • LIVE NET VACANCY & PREFERENCE BUILDER</p>
                         </div>
                     </div>
+                    <div class="cloud-status-badge local" id="cloudStatusBadge" onclick="promptConfigureCloudDb()" title="Click to view or connect Live Cloud Database">
+                        <i class="fa-solid fa-cloud"></i>
+                        <span id="cloudStatusText">Checking Cloud...</span>
+                    </div>
                 </div>
 
                 <!-- SEARCH AUTOCOMPLETE -->
@@ -1435,7 +1604,7 @@
                 <button class="btn btn-accent" onclick="openReviewModal()">
                     <i class="fa-solid fa-plus-circle"></i> Add Ground Info
                 </button>
-                <a href="https://forms.gle/BDd7dDk3Lwz5ju5FA" target="_blank" class="btn">
+                <a href="https://forms.gle/HpEeNNUWh9CVcah18" target="_blank" class="btn">
                     <i class="fa-solid fa-clipboard-check" style="color: #60a5fa;"></i> Google Form
                 </a>
             </div>
@@ -1632,6 +1801,8 @@
                     </select>
                 </div>
 
+                <div id="modalExistingReportsNotice"></div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label style="color: #f59e0b;">Currently Serving FMGE Interns *</label>
@@ -1724,6 +1895,208 @@
         // Storage keys
         const STORAGE_KEY = "MH_CRMI_CROWDSOURCED_REVIEWS_V4";
         const PREF_STORAGE_KEY = "MH_CRMI_PREFERENCE_LIST_V4";
+
+        // ========================================================
+        // REAL-TIME CLOUD DATABASE ENGINE (Firebase RTDB / Multi-Response)
+        // ========================================================
+        let FIREBASE_DB_URL = "https://fmge-maharashtra-internship-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+        const savedCloudUrl = localStorage.getItem("MH_CRMI_CLOUD_DB_URL");
+        if (savedCloudUrl) {
+            FIREBASE_DB_URL = savedCloudUrl;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function formatReviewTime(iso) {
+            if (!iso) return '';
+            try {
+                const d = new Date(iso);
+                const diffMs = Date.now() - d.getTime();
+                const diffMins = Math.floor(diffMs / 60000);
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins}m ago`;
+                const diffHrs = Math.floor(diffMins / 60);
+                if (diffHrs < 24) return `${diffHrs}h ago`;
+                const diffDays = Math.floor(diffHrs / 24);
+                if (diffDays < 7) return `${diffDays}d ago`;
+                return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+            } catch(e) {
+                return '';
+            }
+        }
+
+        // Helper: retrieve all responses for a given college (sorted newest first)
+        function getCollegeReviewsList(sno) {
+            const all = getLocalReviews();
+            const raw = all[sno];
+            if (!raw) return [];
+            // If it's an array of review objects
+            if (Array.isArray(raw)) {
+                return raw.filter(r => r && typeof r === 'object' && (r.currentInterns !== undefined || r.stipend !== undefined))
+                          .sort((a,b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+            }
+            // If it's a legacy single-object format (has primitive currentInterns or stipend)
+            if (raw.currentInterns !== undefined && typeof raw.currentInterns !== 'object') {
+                return [raw];
+            }
+            // If it is an object map of push IDs
+            if (typeof raw === 'object') {
+                const list = [];
+                for (const key in raw) {
+                    const item = raw[key];
+                    if (item && typeof item === 'object' && (item.currentInterns !== undefined || item.stipend !== undefined)) {
+                        list.push(item);
+                    }
+                }
+                return list.sort((a,b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+            }
+            return [];
+        }
+
+        function updateCloudSyncStatus(state, msg) {
+            const badge = document.getElementById('cloudStatusBadge');
+            const txt = document.getElementById('cloudStatusText');
+            if (!badge || !txt) return;
+            badge.className = `cloud-status-badge ${state}`;
+            txt.innerText = msg;
+        }
+
+        function promptConfigureCloudDb() {
+            const current = (FIREBASE_DB_URL && !FIREBASE_DB_URL.includes("YOUR-FIREBASE-PROJECT")) ? FIREBASE_DB_URL : "";
+            const input = prompt(
+                "Enter your Firebase Realtime Database URL to enable LIVE multi-user sync across all phones & laptops:\n(e.g., https://your-project-default-rtdb.firebaseio.com/)",
+                current
+            );
+            if (input !== null) {
+                const trimmed = input.trim();
+                if (trimmed) {
+                    localStorage.setItem("MH_CRMI_CLOUD_DB_URL", trimmed);
+                    FIREBASE_DB_URL = trimmed;
+                    syncFromCloud();
+                } else {
+                    localStorage.removeItem("MH_CRMI_CLOUD_DB_URL");
+                    FIREBASE_DB_URL = "";
+                    updateCloudSyncStatus("local", "Local Mode");
+                }
+            }
+        }
+
+        async function syncFromCloud() {
+            if (!FIREBASE_DB_URL || FIREBASE_DB_URL.includes("YOUR-FIREBASE-PROJECT")) {
+                updateCloudSyncStatus("local", "Local Cache Mode");
+                return;
+            }
+            try {
+                updateCloudSyncStatus("syncing", "Syncing Cloud...");
+                const cleanUrl = FIREBASE_DB_URL.replace(/\/+$/, "");
+                const res = await fetch(`${cleanUrl}/reviews.json`);
+                if (res.ok) {
+                    const cloudData = await res.json();
+                    if (cloudData && typeof cloudData === 'object') {
+                        const local = getLocalReviews();
+                        for (const sno in cloudData) {
+                            if (!local[sno] || typeof local[sno] !== 'object') {
+                                local[sno] = cloudData[sno];
+                            } else if (typeof cloudData[sno] === 'object') {
+                                local[sno] = Object.assign({}, local[sno], cloudData[sno]);
+                            }
+                        }
+                        saveLocalReviews(local);
+                        renderMarkers();
+                        if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
+                        renderPreferencesList();
+                        const collegeCount = Object.keys(local).length;
+                        updateCloudSyncStatus("online", `Cloud Live (${collegeCount} Colleges Reported)`);
+                    } else {
+                        updateCloudSyncStatus("online", "Cloud Connected (Live)");
+                    }
+                    startCloudListener(cleanUrl);
+                } else {
+                    updateCloudSyncStatus("error", "Cloud: Permission Denied");
+                }
+            } catch(e) {
+                console.warn("Cloud sync error:", e);
+                updateCloudSyncStatus("local", "Cloud Offline (Local Mode)");
+            }
+        }
+
+        let cloudEventSource = null;
+        function startCloudListener(cleanUrl) {
+            if (cloudEventSource) {
+                try { cloudEventSource.close(); } catch(e){}
+            }
+            try {
+                cloudEventSource = new EventSource(`${cleanUrl}/reviews.json`);
+                cloudEventSource.addEventListener('put', function(e) {
+                    try {
+                        const payload = JSON.parse(e.data);
+                        if (!payload) return;
+                        const current = getLocalReviews();
+                        if (payload.path === '/') {
+                            if (payload.data && typeof payload.data === 'object') {
+                                const merged = Object.assign({}, current, payload.data);
+                                saveLocalReviews(merged);
+                                renderMarkers();
+                                if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
+                                renderPreferencesList();
+                                updateCloudSyncStatus("online", `Cloud Live (${Object.keys(merged).length} Colleges Reported)`);
+                            }
+                        } else if (payload.path) {
+                            const parts = payload.path.replace(/^\/+/, '').split('/');
+                            const sno = parts[0];
+                            const pushId = parts[1];
+                            if (sno) {
+                                if (!current[sno] || typeof current[sno] !== 'object') current[sno] = {};
+                                if (pushId) {
+                                    if (payload.data === null) {
+                                        delete current[sno][pushId];
+                                    } else {
+                                        current[sno][pushId] = payload.data;
+                                    }
+                                } else {
+                                    if (payload.data && typeof payload.data === 'object') {
+                                        current[sno] = Object.assign({}, current[sno], payload.data);
+                                    }
+                                }
+                                saveLocalReviews(current);
+                                renderMarkers();
+                                if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
+                                renderPreferencesList();
+                                updateCloudSyncStatus("online", `Cloud Live (${Object.keys(current).length} Colleges Reported)`);
+                            }
+                        }
+                    } catch(err) {
+                        console.error("SSE parse error", err);
+                    }
+                });
+            } catch(err) {
+                console.warn("SSE connection error", err);
+            }
+        }
+
+        async function pushReviewToCloud(sno, reviewData) {
+            if (!FIREBASE_DB_URL || FIREBASE_DB_URL.includes("YOUR-FIREBASE-PROJECT")) return false;
+            try {
+                const cleanUrl = FIREBASE_DB_URL.replace(/\/+$/, "");
+                const res = await fetch(`${cleanUrl}/reviews/${sno}.json`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reviewData)
+                });
+                if (res.ok) {
+                    const result = await res.json();
+                    return result && result.name ? result.name : true;
+                }
+                return false;
+            } catch(e) {
+                console.warn("Cloud push failed:", e);
+                return false;
+            }
+        }
 
         function getLocalReviews() {
             try {
@@ -1856,23 +2229,28 @@
 
         // CREATE CLEAN MARKER (NO MISLEADING GROSS CAPACITY ON START PAGE)
         function createCollegeMarker(college) {
-            const reviews = getLocalReviews();
-            const rev = reviews[college.s_no];
+            const revList = getCollegeReviewsList(college.s_no);
 
             // Clean concise name for start screen badge
             let shortName = college.name.split(',')[0].replace('Government Medical College', 'GMC').replace('Medical College', 'MC');
             if (shortName.length > 25) shortName = shortName.substring(0, 23) + '..';
 
             let netTagHtml = '';
-            if (rev && rev.currentInterns !== undefined && rev.currentInterns !== '') {
-                const occupied = parseInt(rev.currentInterns) || 0;
-                const net = Math.max(0, college.seats - occupied);
-                if (net === 0) {
-                    netTagHtml = `<span class="pin-subtag tag-full">Full</span>`;
-                } else if (net <= 5) {
-                    netTagHtml = `<span class="pin-subtag tag-low">Net: ${net}</span>`;
+            if (revList.length > 0) {
+                const latestRev = revList[0];
+                if (latestRev && latestRev.currentInterns !== undefined && latestRev.currentInterns !== '') {
+                    const occupied = parseInt(latestRev.currentInterns) || 0;
+                    const net = Math.max(0, college.seats - occupied);
+                    const countBadge = revList.length > 1 ? `<span style="opacity:0.85;font-size:9px;margin-left:2px;">(${revList.length})</span>` : '';
+                    if (net === 0) {
+                        netTagHtml = `<span class="pin-subtag tag-full">Full${countBadge}</span>`;
+                    } else if (net <= 5) {
+                        netTagHtml = `<span class="pin-subtag tag-low">Net: ${net}${countBadge}</span>`;
+                    } else {
+                        netTagHtml = `<span class="pin-subtag tag-vacant">Net: ${net}${countBadge}</span>`;
+                    }
                 } else {
-                    netTagHtml = `<span class="pin-subtag tag-vacant">Net: ${net}</span>`;
+                    netTagHtml = `<span class="pin-subtag" style="background:#0ea5e9;color:#fff;">${revList.length} Rep</span>`;
                 }
             }
 
@@ -1898,38 +2276,137 @@
             const marker = L.marker([college.lat, college.lng], { icon: icon });
             
             marker.bindPopup(() => renderPopupContent(college), {
-                maxWidth: 410,
+                maxWidth: 420,
                 className: 'custom-leaflet-popup'
             });
 
             return marker;
         }
 
-        // RENDER POPUP WITH TRUE NET VACANCY SUBTRACTION ENGINE
+        // RENDER POPUP WITH TRUE MULTI-RESPONSE COMMUNITY FEED & CONSENSUS ENGINE
         function renderPopupContent(college) {
-            const reviews = getLocalReviews();
-            const rev = reviews[college.s_no] || {};
+            const revList = getCollegeReviewsList(college.s_no);
             const prefList = getPreferences();
             const isStarred = prefList.includes(college.s_no);
-
             const gross = college.seats;
-            let occupied = (rev.currentInterns !== undefined && rev.currentInterns !== '') ? parseInt(rev.currentInterns) : null;
-            let netVacancy = occupied !== null ? Math.max(0, gross - occupied) : gross;
-            let percentOccupied = occupied !== null ? Math.min(100, Math.round((occupied / gross) * 100)) : 0;
+
+            let occupied = null;
+            let netVacancy = gross;
+            let percentOccupied = 0;
+            let occupancySummaryText = 'Occupancy unverified by seniors';
+            let internDisplayNum = '—';
+
+            if (revList.length > 0) {
+                const internNums = revList.map(r => parseInt(r.currentInterns)).filter(n => !isNaN(n));
+                const latestRev = revList[0];
+                if (latestRev && latestRev.currentInterns !== undefined && latestRev.currentInterns !== '') {
+                    occupied = parseInt(latestRev.currentInterns);
+                    if (!isNaN(occupied)) {
+                        netVacancy = Math.max(0, gross - occupied);
+                        percentOccupied = Math.min(100, Math.round((occupied / gross) * 100));
+                    }
+                }
+
+                if (internNums.length === 1) {
+                    internDisplayNum = `${internNums[0]}`;
+                    occupancySummaryText = `${internNums[0]} / ${gross} Occupied (${percentOccupied}%) • 1 Senior Report`;
+                } else if (internNums.length > 1) {
+                    const minO = Math.min(...internNums);
+                    const maxO = Math.max(...internNums);
+                    if (minO === maxO) {
+                        internDisplayNum = `${minO}`;
+                        occupancySummaryText = `${minO} / ${gross} Occupied (${percentOccupied}%) • ${internNums.length} Seniors in Consensus`;
+                    } else {
+                        internDisplayNum = `${minO}–${maxO}`;
+                        occupancySummaryText = `Reported: ${minO} to ${maxO} across ${internNums.length} seniors (Latest: ${occupied !== null ? occupied : maxO})`;
+                    }
+                }
+            }
 
             let barColor = '#10b981';
             if (percentOccupied >= 85) barColor = '#ef4444';
             else if (percentOccupied >= 50) barColor = '#f59e0b';
 
-            const stipendVal = rev.stipend || '<span style="color: #64748b; font-style: italic;">Not reported yet</span>';
-            const biometricVal = rev.biometrics || '<span style="color: #64748b; font-style: italic;">Not reported yet</span>';
-            const workloadVal = rev.workload || '<span style="color: #64748b; font-style: italic;">Not reported</span>';
-            const hostelVal = rev.hostel || '<span style="color: #64748b; font-style: italic;">Not reported</span>';
-            const hiddenFeesVal = rev.hiddenFees || '<span style="color: #10b981; font-weight: 600;">₹0 / None reported</span>';
-            const livingCostVal = rev.livingCost || '<span style="color: #64748b; font-style: italic;">Not reported</span>';
-
-            // Exact verified place query for Google Maps
+            // Google Maps query
             const gmapsQuery = encodeURIComponent(`${college.name}, ${college.city}, Maharashtra`);
+
+            // Build multi-response reviews stream HTML
+            let reviewsStreamHtml = '';
+            if (revList.length === 0) {
+                reviewsStreamHtml = `
+                    <div style="text-align: center; padding: 14px 10px; background: rgba(30, 41, 59, 0.4); border-radius: var(--radius-sm); border: 1px dashed rgba(255,255,255,0.1);">
+                        <i class="fa-solid fa-clipboard-question" style="font-size: 22px; color: #94a3b8; margin-bottom: 6px;"></i>
+                        <div style="font-size: 11px; color: #cbd5e1; font-weight: 600;">No Ground Reports Yet</div>
+                        <div style="font-size: 10px; color: #94a3b8; margin-top: 2px;">Are you currently an intern or contact here? Submit stipend & occupancy info to help Maharashtra candidates.</div>
+                        <button class="btn btn-sm btn-accent" style="margin-top: 8px; padding: 4px 12px; font-size: 11px;" onclick="openReviewModalForCollege(${college.s_no})">
+                            <i class="fa-solid fa-plus"></i> Submit First Report
+                        </button>
+                    </div>
+                `;
+            } else {
+                reviewsStreamHtml = `<div class="review-stream">`;
+                revList.forEach((r, idx) => {
+                    const isLatest = idx === 0;
+                    const reportNum = revList.length - idx;
+                    const reportTime = formatReviewTime(r.timestamp);
+                    const authorName = escapeHtml(r.author || 'Anonymous Senior');
+                    const rOccupied = (r.currentInterns !== undefined && r.currentInterns !== '') ? r.currentInterns : 'Unreported';
+                    const rStipend = escapeHtml(r.stipend || 'Unreported');
+                    const rBiometrics = escapeHtml(r.biometrics || 'Unreported');
+                    const rHiddenFees = escapeHtml(r.hiddenFees || '₹0 / None');
+                    const rLivingCost = escapeHtml(r.livingCost || 'Unreported');
+                    const rWorkload = escapeHtml(r.workload || 'Unreported');
+                    const rHostel = escapeHtml(r.hostel || 'Unreported');
+                    const isFeesDemanded = r.hiddenFees && !r.hiddenFees.toLowerCase().includes('none') && !r.hiddenFees.includes('0');
+
+                    reviewsStreamHtml += `
+                        <div class="review-card ${isLatest ? 'latest-report' : ''}">
+                            <div class="review-card-header">
+                                <div class="review-author">
+                                    <i class="fa-solid fa-user-doctor" style="color: ${isLatest ? '#38bdf8' : '#94a3b8'};"></i>
+                                    <span>${authorName}</span>
+                                    <span class="review-tag-badge ${isLatest ? '' : 'badge-sub'}">${isLatest ? 'Latest' : `#${reportNum}`}</span>
+                                </div>
+                                <div class="review-time">
+                                    <i class="fa-regular fa-clock"></i> ${reportTime}
+                                </div>
+                            </div>
+                            <div class="review-grid">
+                                <div class="review-cell">
+                                    <div class="lbl">Reported Interns</div>
+                                    <div class="val" style="color: #f59e0b;">${rOccupied} / ${gross}</div>
+                                </div>
+                                <div class="review-cell">
+                                    <div class="lbl">Monthly Stipend</div>
+                                    <div class="val" style="color: #34d399;">${rStipend}</div>
+                                </div>
+                                <div class="review-cell">
+                                    <div class="lbl">Biometrics</div>
+                                    <div class="val">${rBiometrics}</div>
+                                </div>
+                                <div class="review-cell" style="background: ${isFeesDemanded ? 'rgba(239, 68, 68, 0.15)' : 'rgba(15, 23, 42, 0.6)'};">
+                                    <div class="lbl" style="color: ${isFeesDemanded ? '#f87171' : 'var(--text-muted)'};">Hidden Fees</div>
+                                    <div class="val" style="color: ${isFeesDemanded ? '#fca5a5' : '#34d399'}; font-weight: 700;">${rHiddenFees}</div>
+                                </div>
+                                <div class="review-cell">
+                                    <div class="lbl">Rent / Living Cost</div>
+                                    <div class="val" style="color: #38bdf8;">${rLivingCost}</div>
+                                </div>
+                                <div class="review-cell">
+                                    <div class="lbl">Workload / Hostel</div>
+                                    <div class="val">${rWorkload} • ${rHostel}</div>
+                                </div>
+                            </div>
+                            ${r.notes ? `
+                                <div class="review-notes-box">
+                                    <i class="fa-solid fa-quote-left" style="color: #f59e0b; opacity: 0.8; margin-right: 4px;"></i>${escapeHtml(r.notes)}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                reviewsStreamHtml += `</div>`;
+            }
 
             return `
                 <div class="popup-header">
@@ -1954,7 +2431,7 @@
                             </div>
                             <div class="vacancy-cell">
                                 <div class="lbl">Current FMGs</div>
-                                <div class="num" style="color: #f59e0b;">${occupied !== null ? occupied : '—'}</div>
+                                <div class="num" style="color: #f59e0b;">${internDisplayNum}</div>
                             </div>
                             <div class="vacancy-cell ${occupied !== null && netVacancy === 0 ? 'highlight-full' : 'highlight-net'}">
                                 <div class="lbl">${occupied !== null ? 'True Net Vacancy' : 'Base Approved'}</div>
@@ -1967,51 +2444,25 @@
                             <div class="progress-fill" style="width: ${occupied !== null ? percentOccupied : 0}%; background: ${barColor};"></div>
                         </div>
                         <div class="progress-info">
-                            <span>${occupied !== null ? `${occupied} / ${gross} Occupied (${percentOccupied}%)` : 'Occupancy unverified by seniors'}</span>
-                            <span style="color: ${netVacancy === 0 ? '#ef4444' : '#34d399'};">${occupied !== null ? `${netVacancy} Vacancies Left` : 'Click + Update Ground Info'}</span>
+                            <span>${occupancySummaryText}</span>
+                            <span style="color: ${netVacancy === 0 ? '#ef4444' : '#34d399'};">${occupied !== null ? `${netVacancy} Vacancies Left` : 'Click + Add Report'}</span>
                         </div>
                     </div>
 
-                    <!-- Ground Reality Reports -->
+                    <!-- Ground Reality Multi-Response Community Stream -->
                     <div class="ground-info-section">
                         <div class="ground-header">
-                            <span><i class="fa-solid fa-users"></i> Ground Reality (Community)</span>
+                            <span>
+                                <i class="fa-solid fa-users"></i> Ground Reality
+                                <span style="background: rgba(56,189,248,0.2); color: #38bdf8; font-size: 10px; padding: 1px 7px; border-radius: 10px; margin-left: 4px; text-transform: none;">
+                                    ${revList.length} ${revList.length === 1 ? 'Report' : 'Reports'}
+                                </span>
+                            </span>
                             <button class="btn btn-sm btn-accent" style="padding: 2px 8px; font-size: 10px;" onclick="openReviewModalForCollege(${college.s_no})">
-                                + Update Info
+                                + Add Report
                             </button>
                         </div>
-                        <div class="ground-grid">
-                            <div class="ground-cell">
-                                <div class="label">Monthly Stipend</div>
-                                <div class="val">${stipendVal}</div>
-                            </div>
-                            <div class="ground-cell">
-                                <div class="label">Biometrics</div>
-                                <div class="val">${biometricVal}</div>
-                            </div>
-                            <div class="ground-cell" style="background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.2);">
-                                <div class="label" style="color: #f87171;">Hidden Fees / Demands</div>
-                                <div class="val" style="color: #fca5a5;">${hiddenFeesVal}</div>
-                            </div>
-                            <div class="ground-cell" style="background: rgba(56, 189, 248, 0.08); border-color: rgba(56, 189, 248, 0.2);">
-                                <div class="label" style="color: #38bdf8;">Average Rent / Living Cost</div>
-                                <div class="val" style="color: #bae6fd;">${livingCostVal}</div>
-                            </div>
-                            <div class="ground-cell">
-                                <div class="label">Workload</div>
-                                <div class="val">${workloadVal}</div>
-                            </div>
-                            <div class="ground-cell">
-                                <div class="label">Hostel for FMGs</div>
-                                <div class="val">${hostelVal}</div>
-                            </div>
-                        </div>
-                        ${rev.notes ? `
-                            <div style="margin-top: 8px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,0.1); font-size: 11px; color: #e2e8f0;">
-                                <i class="fa-solid fa-comment-dots" style="color: #f59e0b;"></i> "${rev.notes}"
-                                ${rev.author ? `<div style="text-align: right; color: var(--text-muted); font-size: 10px;">— ${rev.author}</div>` : ''}
-                            </div>
-                        ` : ''}
+                        ${reviewsStreamHtml}
                     </div>
 
                     <div class="popup-actions">
@@ -2370,7 +2821,8 @@
                 const c = collegesData.find(x => x.s_no === sno);
                 if (!c) return;
 
-                const rev = reviews[sno] || {};
+                const revList = getCollegeReviewsList(sno);
+                const rev = revList.length > 0 ? revList[0] : {};
                 const occupied = (rev.currentInterns !== undefined && rev.currentInterns !== '') ? parseInt(rev.currentInterns) : null;
                 const net = occupied !== null ? Math.max(0, c.seats - occupied) : c.seats;
 
@@ -2441,7 +2893,6 @@
                 alert("Please shortlist colleges first before exporting!");
                 return;
             }
-            const reviews = getLocalReviews();
             let text = "========================================================\n";
             text += "MAHARASHTRA CRMI 2026-2027 COUNSELING PREFERENCE LIST\n";
             text += "========================================================\n\n";
@@ -2449,12 +2900,13 @@
             prefList.forEach((sno, idx) => {
                 const c = collegesData.find(x => x.s_no === sno);
                 if (c) {
-                    const rev = reviews[sno] || {};
+                    const revList = getCollegeReviewsList(sno);
+                    const rev = revList.length > 0 ? revList[0] : {};
                     const occupied = (rev.currentInterns !== undefined && rev.currentInterns !== '') ? parseInt(rev.currentInterns) : 'Unreported';
                     const net = typeof occupied === 'number' ? Math.max(0, c.seats - occupied) : c.seats;
                     text += `Choice #${idx + 1}: [S.No #${c.s_no}] ${c.name}\n`;
                     text += `   Location: ${c.city}, ${c.district} (${c.division} Division)\n`;
-                    text += `   NMC Gross Quota: ${c.seats} Seats | Current FMGs: ${occupied} | Net Vacancy: ${net}\n`;
+                    text += `   NMC Gross Quota: ${c.seats} Seats | Current FMGs: ${occupied} | Net Vacancy: ${net} (${revList.length} Reports)\n`;
                     text += `   Stipend: ${rev.stipend || 'Unreported'} | Biometrics: ${rev.biometrics || 'Unreported'}\n\n`;
                 }
             });
@@ -2491,7 +2943,8 @@
                 }
 
                 shownCount++;
-                const rev = reviews[c.s_no] || {};
+                const revList = getCollegeReviewsList(c.s_no);
+                const rev = revList.length > 0 ? revList[0] : {};
                 const occupied = (rev.currentInterns !== undefined && rev.currentInterns !== '') ? parseInt(rev.currentInterns) : null;
                 const net = occupied !== null ? Math.max(0, c.seats - occupied) : c.seats;
                 const isStarred = prefList.includes(c.s_no);
@@ -2499,9 +2952,12 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td style="font-weight: 700; color: var(--primary);">#${c.s_no}</td>
-                    <td style="font-weight: 600; color: #fff;">${c.name}</td>
+                    <td style="font-weight: 600; color: #fff;">
+                        ${c.name}
+                        ${revList.length > 1 ? `<span style="background: rgba(56,189,248,0.2); color: #38bdf8; font-size: 10px; padding: 1px 6px; border-radius: 8px; margin-left: 6px; font-weight: normal;">${revList.length} Reports</span>` : ''}
+                    </td>
                     <td style="text-align: center; font-family: 'JetBrains Mono'; font-weight: 700; color: #94a3b8;">${c.seats}</td>
-                    <td style="text-align: center; font-family: 'JetBrains Mono'; font-weight: 700; color: #f59e0b;">${occupied !== null ? occupied : '—'}</td>
+                    <td style="text-align: center; font-family: 'JetBrains Mono'; font-weight: 700; color: #f59e0b;">${occupied !== null ? (revList.length > 1 ? `${occupied}*` : occupied) : '—'}</td>
                     <td style="text-align: center; font-family: 'JetBrains Mono'; font-weight: 800; font-size: 14px; color: ${net === 0 ? '#ef4444' : '#10b981'};">
                         ${occupied !== null ? net : `${c.seats}*`}
                     </td>
@@ -2518,7 +2974,7 @@
                             <i class="fa-solid fa-location-crosshairs"></i> View
                         </button>
                         <button class="btn btn-sm btn-accent" style="padding: 4px 8px;" onclick="openReviewModalForCollege(${c.s_no})">
-                            <i class="fa-solid fa-pen"></i> Edit
+                            <i class="fa-solid fa-plus"></i> +Report
                         </button>
                     </td>
                 `;
@@ -2574,24 +3030,52 @@
         });
 
         function syncModalCollegeDetails() {
-            const sno = parseInt(document.getElementById('modalCollegeSelect').value);
-            const rev = getLocalReviews()[sno];
-            if (rev) {
-                document.getElementById('modalCurrentInterns').value = rev.currentInterns !== undefined ? rev.currentInterns : '';
-                document.getElementById('modalStipend').value = rev.stipend || '';
-                document.getElementById('modalBiometrics').value = rev.biometrics || 'Not Specified';
-                document.getElementById('modalWorkload').value = rev.workload || 'Not Specified';
-                document.getElementById('modalHostel').value = rev.hostel || 'Not Specified';
-                document.getElementById('modalHiddenFees').value = rev.hiddenFees || '';
-                document.getElementById('modalLivingCost').value = rev.livingCost || '';
-                document.getElementById('modalNotes').value = rev.notes || '';
-                document.getElementById('modalAuthor').value = rev.author || '';
+            const selectEl = document.getElementById('modalCollegeSelect');
+            if (!selectEl || !selectEl.value) return;
+            const sno = parseInt(selectEl.value);
+            const college = collegesData.find(c => c.s_no === sno);
+            
+            const revList = getCollegeReviewsList(sno);
+            const noticeEl = document.getElementById('modalExistingReportsNotice');
+            if (noticeEl) {
+                if (revList.length > 0) {
+                    noticeEl.innerHTML = `
+                        <div style="margin-bottom: 12px; padding: 8px 12px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: var(--radius-sm); font-size: 11px; color: #bae6fd;">
+                            <i class="fa-solid fa-users" style="color: #38bdf8; margin-right: 4px;"></i>
+                            <strong>${revList.length} Ground Report(s) on record</strong> for this hospital. Your submission will be preserved as a new distinct report in the live feed!
+                        </div>
+                    `;
+                } else {
+                    noticeEl.innerHTML = `
+                        <div style="margin-bottom: 12px; padding: 8px 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-sm); font-size: 11px; color: #a7f3d0;">
+                            <i class="fa-solid fa-sparkles" style="color: #34d399; margin-right: 4px;"></i>
+                            Be the first to report ground facts for <strong>${college ? college.name : 'this college'}</strong>!
+                        </div>
+                    `;
+                }
+            }
+
+            if (revList.length > 0) {
+                const latest = revList[0];
+                document.getElementById('modalCurrentInterns').value = (latest.currentInterns !== undefined && latest.currentInterns !== '') ? latest.currentInterns : '';
+                document.getElementById('modalStipend').value = latest.stipend !== 'Not Reported' ? (latest.stipend || '') : '';
+                document.getElementById('modalBiometrics').value = latest.biometrics || 'Not Specified';
+                document.getElementById('modalWorkload').value = latest.workload || 'Not Specified';
+                document.getElementById('modalHostel').value = latest.hostel || 'Not Specified';
+                document.getElementById('modalHiddenFees').value = (latest.hiddenFees !== 'None / ₹0' && latest.hiddenFees !== 'None') ? (latest.hiddenFees || '') : '';
+                document.getElementById('modalLivingCost').value = latest.livingCost !== 'Not Reported' ? (latest.livingCost || '') : '';
+                document.getElementById('modalNotes').value = '';
+                document.getElementById('modalAuthor').value = '';
             } else {
                 document.getElementById('modalCurrentInterns').value = '';
                 document.getElementById('modalStipend').value = '';
+                document.getElementById('modalBiometrics').value = 'Not Specified';
+                document.getElementById('modalWorkload').value = 'Not Specified';
+                document.getElementById('modalHostel').value = 'Not Specified';
                 document.getElementById('modalHiddenFees').value = '';
                 document.getElementById('modalLivingCost').value = '';
                 document.getElementById('modalNotes').value = '';
+                document.getElementById('modalAuthor').value = '';
             }
             calcModalNetVacancy();
         }
@@ -2632,7 +3116,7 @@
             setDockActive(document.getElementById('dockBtnMap'));
         }
 
-        function saveGroundReview() {
+        async function saveGroundReview() {
             const sno = document.getElementById('modalCollegeSelect').value;
             const currentInterns = document.getElementById('modalCurrentInterns').value.trim();
             const stipend = document.getElementById('modalStipend').value.trim();
@@ -2644,8 +3128,7 @@
             const notes = document.getElementById('modalNotes').value.trim();
             const author = document.getElementById('modalAuthor').value.trim();
 
-            const reviews = getLocalReviews();
-            reviews[sno] = {
+            const reviewObj = {
                 currentInterns: currentInterns,
                 stipend: stipend || 'Not Reported',
                 biometrics: biometrics,
@@ -2658,12 +3141,38 @@
                 timestamp: new Date().toISOString()
             };
 
+            const tempPushId = 'rep_' + Date.now();
+            const reviews = getLocalReviews();
+            if (!reviews[sno] || typeof reviews[sno] !== 'object') {
+                reviews[sno] = {};
+            } else if (reviews[sno].currentInterns !== undefined && typeof reviews[sno].currentInterns !== 'object') {
+                // Migrate legacy single object into push map
+                const legacy = Object.assign({}, reviews[sno]);
+                reviews[sno] = { 'legacy': legacy };
+            }
+            reviews[sno][tempPushId] = reviewObj;
+
             saveLocalReviews(reviews);
             closeReviewModal();
             renderMarkers();
             if (document.getElementById('mainDrawer').classList.contains('open')) renderTable();
             renderPreferencesList();
-            alert("Ground reality info saved! Net vacancy recalculated across map and tables.");
+
+            // Push to live cloud database via POST (creates persistent unique push ID in Firebase)
+            const pushResult = await pushReviewToCloud(sno, reviewObj);
+            if (pushResult && typeof pushResult === 'string') {
+                const cur = getLocalReviews();
+                if (cur[sno] && cur[sno][tempPushId]) {
+                    delete cur[sno][tempPushId];
+                    cur[sno][pushResult] = reviewObj;
+                    saveLocalReviews(cur);
+                }
+                alert("Ground report submitted & synced to LIVE DATABASE! Previous seniors' reviews remain intact.");
+            } else if (pushResult) {
+                alert("Ground report submitted & synced to LIVE DATABASE!");
+            } else {
+                alert("Ground report saved in local browser! (Cloud sync will update when connected).");
+            }
         }
 
         function exportCrowdsourcedData() {
@@ -2701,13 +3210,14 @@
         }
 
         function exportTableToCSV() {
-            const reviews = getLocalReviews();
-            let csv = "NMC_SNo,College_Name,Gross_Quota,Current_FMGs,Net_Vacancy,City,District,Division,Stipend,Biometrics,Hidden_Fees,Living_Cost,Notes\n";
+            let csv = "NMC_SNo,College_Name,Gross_Quota,Current_FMGs,Net_Vacancy,Reports_Count,City,District,Division,Stipend,Biometrics,Hidden_Fees,Living_Cost,Notes\n";
             collegesData.forEach(c => {
-                const rev = reviews[c.s_no] || {};
+                const revList = getCollegeReviewsList(c.s_no);
+                const rev = revList.length > 0 ? revList[0] : {};
                 const occ = rev.currentInterns !== undefined ? rev.currentInterns : '';
                 const net = occ !== '' ? Math.max(0, c.seats - parseInt(occ)) : c.seats;
-                csv += `"${c.s_no}","${c.name.replace(/"/g, '""')}","${c.seats}","${occ}","${net}","${c.city}","${c.district}","${c.division}","${(rev.stipend || '').replace(/"/g, '""')}","${(rev.biometrics || '').replace(/"/g, '""')}","${(rev.hiddenFees || '').replace(/"/g, '""')}","${(rev.livingCost || '').replace(/"/g, '""')}","${(rev.notes || '').replace(/"/g, '""')}"\n`;
+                const reportsCount = revList.length;
+                csv += `"${c.s_no}","${c.name.replace(/"/g, '""')}","${c.seats}","${occ}","${net}","${reportsCount}","${c.city}","${c.district}","${c.division}","${(rev.stipend || '').replace(/"/g, '""')}","${(rev.biometrics || '').replace(/"/g, '""')}","${(rev.hiddenFees || '').replace(/"/g, '""')}","${(rev.livingCost || '').replace(/"/g, '""')}","${(rev.notes || '').replace(/"/g, '""')}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -2845,6 +3355,7 @@
         // Initial render
         updatePreferenceBadge();
         renderMarkers();
+        syncFromCloud();
     </script>
 
     <!-- MOBILE BOTTOM APP NAVIGATION DOCK (Thumb-accessible native app navigation) -->
@@ -2866,7 +3377,7 @@
             <i class="fa-solid fa-plus-circle" style="color: #10b981;"></i>
             <span>Add Info</span>
         </button>
-        <a href="https://forms.gle/BDd7dDk3Lwz5ju5FA" target="_blank" class="dock-btn" style="text-decoration: none;">
+        <a href="https://forms.gle/HpEeNNUWh9CVcah18" target="_blank" class="dock-btn" style="text-decoration: none;">
             <i class="fa-solid fa-clipboard-check" style="color: #818cf8;"></i>
             <span>Form</span>
         </a>
